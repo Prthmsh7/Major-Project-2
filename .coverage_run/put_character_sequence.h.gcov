@@ -1,0 +1,64 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__ostream/put_character_sequence.h
+        -:    0:Graph:test_main.gcno
+        -:    0:Data:test_main.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1://===---------------------------------------------------------------------===//
+        -:    2://
+        -:    3:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    4:// See https://llvm.org/LICENSE.txt for license information.
+        -:    5:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    6://
+        -:    7://===---------------------------------------------------------------------===//
+        -:    8:
+        -:    9:#ifndef _LIBCPP___OSTREAM_PUT_CHARACTER_SEQUENCE_H
+        -:   10:#define _LIBCPP___OSTREAM_PUT_CHARACTER_SEQUENCE_H
+        -:   11:
+        -:   12:#include <__config>
+        -:   13:
+        -:   14:#if _LIBCPP_HAS_LOCALIZATION
+        -:   15:
+        -:   16:#  include <__cstddef/size_t.h>
+        -:   17:#  include <__fwd/ostream.h>
+        -:   18:#  include <__iterator/ostreambuf_iterator.h>
+        -:   19:#  include <__locale_dir/pad_and_output.h>
+        -:   20:#  include <ios>
+        -:   21:
+        -:   22:#  if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   23:#    pragma GCC system_header
+        -:   24:#  endif
+        -:   25:
+        -:   26:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   27:
+        -:   28:template <class _CharT, class _Traits>
+        -:   29:_LIBCPP_HIDE_FROM_ABI basic_ostream<_CharT, _Traits>&
+        3:   30:__put_character_sequence(basic_ostream<_CharT, _Traits>& __os, const _CharT* __str, size_t __len) {
+        -:   31:#  if _LIBCPP_HAS_EXCEPTIONS
+        -:   32:  try {
+        -:   33:#  endif // _LIBCPP_HAS_EXCEPTIONS
+        3:   34:    typename basic_ostream<_CharT, _Traits>::sentry __s(__os);
+        3:   35:    if (__s) {
+        -:   36:      typedef ostreambuf_iterator<_CharT, _Traits> _Ip;
+        3:   37:      if (std::__pad_and_output(
+        3:   38:              _Ip(__os),
+        3:   39:              __str,
+        3:   40:              (__os.flags() & ios_base::adjustfield) == ios_base::left ? __str + __len : __str,
+        3:   41:              __str + __len,
+        3:   42:              __os,
+        3:   43:              __os.fill())
+        3:   44:              .failed())
+    #####:   45:        __os.setstate(ios_base::badbit | ios_base::failbit);
+        3:   46:    }
+        -:   47:#  if _LIBCPP_HAS_EXCEPTIONS
+        3:   48:  } catch (...) {
+    #####:   49:    __os.__set_badbit_and_consider_rethrow();
+    #####:   50:  }
+        -:   51:#  endif // _LIBCPP_HAS_EXCEPTIONS
+        3:   52:  return __os;
+    #####:   53:}
+        -:   54:
+        -:   55:_LIBCPP_END_NAMESPACE_STD
+        -:   56:
+        -:   57:#endif // _LIBCPP_HAS_LOCALIZATION
+        -:   58:
+        -:   59:#endif // _LIBCPP___OSTREAM_PUT_CHARACTER_SEQUENCE_H

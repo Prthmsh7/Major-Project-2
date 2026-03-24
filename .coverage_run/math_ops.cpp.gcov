@@ -1,0 +1,25 @@
+        -:    0:Source:math_ops.cpp
+        -:    0:Graph:test_main.gcno
+        -:    0:Data:test_main.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include <iostream>
+        -:    2:
+        6:    3:int calculate(int a, int b, char op) {
+        6:    4:    if (op == '+') {
+        1:    5:        return a + b;
+        5:    6:    } else if (op == '-') {
+        1:    7:        return a - b;
+        4:    8:    } else if (op == '*') {
+        1:    9:        return a * b;
+        3:   10:    } else if (op == '/') {
+        2:   11:        if (b != 0) {
+        1:   12:            return a / b;
+        -:   13:        } else {
+        1:   14:            std::cout << "Division by zero!" << std::endl;
+        1:   15:            return 0;
+        -:   16:        }
+        -:   17:    }
+        1:   18:    std::cout << "Unknown operation." << std::endl;
+        1:   19:    return 0;
+        6:   20:}
