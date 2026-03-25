@@ -1,0 +1,42 @@
+        -:    0:Source:test_main.cpp
+        -:    0:Graph:test_main.gcno
+        -:    0:Data:test_main.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:#include "math_ops.cpp"
+        -:    2:#include <cassert>
+        -:    3:#include <iostream>
+        -:    4:
+        -:    5:#include <cassert>
+        -:    6:#include <iostream> // Required for std::cout in the original function
+        -:    7:
+        -:    8:// Assuming calculate function is available in the scope, e.g., via an include or direct definition.
+        -:    9:// For this exercise, we assume it's linked or included.
+        -:   10:
+        1:   11:void test_llm_gen_1() {
+        -:   12:    // Test case for addition (covers lines 3, 4, 5)
+        1:   13:    assert(calculate(5, 3, '+') == 8);
+        -:   14:
+        -:   15:    // Test case for subtraction (covers lines 3, 4(false), 6, 7)
+        1:   16:    assert(calculate(10, 4, '-') == 6);
+        -:   17:
+        -:   18:    // Test case for multiplication (covers lines 3, 4(false), 6(false), 8, 9)
+        1:   19:    assert(calculate(2, 6, '*') == 12);
+        -:   20:
+        -:   21:    // Test case for division with non-zero denominator (covers lines 3, 4(false), 6(false), 8(false), 10, 11, 12)
+        1:   22:    assert(calculate(15, 3, '/') == 5);
+        -:   23:
+        -:   24:    // Test case for division by zero (covers lines 3, 4(false), 6(false), 8(false), 10, 11(false), 14, 15)
+        -:   25:    // Note: This will print "Division by zero!" to std::cout.
+        1:   26:    assert(calculate(20, 0, '/') == 0);
+        -:   27:
+        -:   28:    // Test case for unknown operation (covers lines 3, 4(false), 6(false), 8(false), 10(false), 18, 19, 20)
+        -:   29:    // Note: This will print "Unknown operation." to std::cout.
+        1:   30:    assert(calculate(7, 2, '%') == 0);
+        1:   31:}
+        -:   32:
+        1:   33:int main() {
+        1:   34:    test_llm_gen_1();
+        1:   35:    std::cout << "All tests passed successfully!\n";
+        1:   36:    return 0;
+        -:   37:}
