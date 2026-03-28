@@ -1,0 +1,142 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__new/allocate.h
+        -:    0:Graph:test_main.gcno
+        -:    0:Data:test_main.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1://===----------------------------------------------------------------------===//
+        -:    2://
+        -:    3:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    4:// See https://llvm.org/LICENSE.txt for license information.
+        -:    5:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    6://
+        -:    7://===----------------------------------------------------------------------===//
+        -:    8:
+        -:    9:#ifndef _LIBCPP___NEW_ALLOCATE_H
+        -:   10:#define _LIBCPP___NEW_ALLOCATE_H
+        -:   11:
+        -:   12:#include <__config>
+        -:   13:#include <__cstddef/max_align_t.h>
+        -:   14:#include <__cstddef/size_t.h>
+        -:   15:#include <__new/align_val_t.h>
+        -:   16:#include <__new/global_new_delete.h> // for _LIBCPP_HAS_SIZED_DEALLOCATION
+        -:   17:#include <__type_traits/type_identity.h>
+        -:   18:#include <__utility/element_count.h>
+        -:   19:
+        -:   20:#include <__configuration/availability.h>
+        -:   21:#include <__new/global_typed_new_delete.h>
+        -:   22:
+        -:   23:#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   24:#  pragma GCC system_header
+        -:   25:#endif
+        -:   26:
+        -:   27:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   28:
+        -:   29:_LIBCPP_CONSTEXPR inline _LIBCPP_HIDE_FROM_ABI bool __is_overaligned_for_new(size_t __align) _NOEXCEPT {
+        -:   30:#ifdef __STDCPP_DEFAULT_NEW_ALIGNMENT__
+        -:   31:  return __align > __STDCPP_DEFAULT_NEW_ALIGNMENT__;
+        -:   32:#else
+        -:   33:  return __align > _LIBCPP_ALIGNOF(max_align_t);
+        -:   34:#endif
+        -:   35:}
+        -:   36:
+        -:   37:#if __has_feature(typed_cxx_new_delete)
+        -:   38:template <class _Tp>
+        -:   39:_LIBCPP_HIDE_FROM_ABI std::__type_descriptor_t __compute_type_descriptor() {
+        -:   40:  // Construct the type descriptor for the given type. We also set a bit in the
+        -:   41:  // type_kind part of the summary indicating this is generated from C++.
+        -:   42:  auto __descriptor = __builtin_tmo_get_type_descriptor(_Tp);
+        -:   43:  auto __from_cxx   = 0x00000c0000000000 | __descriptor;
+        -:   44:  return std::__type_descriptor_t(__from_cxx);
+        -:   45:}
+        -:   46:
+        -:   47:#  define _LIBCPP_ADD_TYPE_DESCRIPTOR(_Type) , ::std::__compute_type_descriptor<_Type>()
+        -:   48:#else
+        -:   49:#  define _LIBCPP_ADD_TYPE_DESCRIPTOR(_Type) /* nothing */
+        -:   50:#endif
+        -:   51:
+        -:   52:template <class _Tp>
+       10:   53:_LIBCPP_HIDE_FROM_ABI void* __libcpp_operator_new(size_t __n) {
+        -:   54:#if __has_builtin(__builtin_operator_new) && __has_builtin(__builtin_operator_delete)
+       10:   55:  return __builtin_operator_new(__n _LIBCPP_ADD_TYPE_DESCRIPTOR(_Tp));
+        -:   56:#else
+        -:   57:  return ::operator new(__n _LIBCPP_ADD_TYPE_DESCRIPTOR(_Tp));
+        -:   58:#endif
+        -:   59:}
+        -:   60:
+        -:   61:template <class _Tp, class... _Args>
+        -:   62:_LIBCPP_HIDE_FROM_ABI void* __libcpp_operator_new(_Args... __args) {
+        -:   63:#if __has_builtin(__builtin_operator_new) && __has_builtin(__builtin_operator_delete)
+        -:   64:  return __builtin_operator_new(__args...);
+        -:   65:#else
+        -:   66:  return ::operator new(__args...);
+        -:   67:#endif
+        -:   68:}
+        -:   69:
+        -:   70:template <class... _Args>
+       10:   71:_LIBCPP_HIDE_FROM_ABI void __libcpp_operator_delete(_Args... __args) _NOEXCEPT {
+        -:   72:#if __has_builtin(__builtin_operator_new) && __has_builtin(__builtin_operator_delete)
+       10:   73:  __builtin_operator_delete(__args...);
+        -:   74:#else
+        -:   75:  ::operator delete(__args...);
+        -:   76:#endif
+       10:   77:}
+        -:   78:
+        -:   79:template <class _Tp>
+        -:   80:inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_NO_CFI _Tp*
+       10:   81:__libcpp_allocate(__element_count __n, size_t __align = _LIBCPP_ALIGNOF(_Tp)) {
+       10:   82:  size_t __size = static_cast<size_t>(__n) * sizeof(_Tp);
+        -:   83:#if _LIBCPP_HAS_ALIGNED_ALLOCATION
+        -:   84:  if (__is_overaligned_for_new(__align)) {
+        -:   85:    const align_val_t __align_val = static_cast<align_val_t>(__align);
+        -:   86:    return static_cast<_Tp*>(std::__libcpp_operator_new<_Tp>(__size, __align_val));
+        -:   87:  }
+        -:   88:#endif
+        -:   89:
+        -:   90:  (void)__align;
+       10:   91:  return static_cast<_Tp*>(std::__libcpp_operator_new<_Tp>(__size));
+        -:   92:}
+        -:   93:
+        -:   94:#if _LIBCPP_HAS_SIZED_DEALLOCATION
+        -:   95:#  define _LIBCPP_ONLY_IF_SIZED_DEALLOCATION(...) __VA_ARGS__
+        -:   96:#else
+        -:   97:#  define _LIBCPP_ONLY_IF_SIZED_DEALLOCATION(...) /* nothing */
+        -:   98:#endif
+        -:   99:
+        -:  100:template <class _Tp>
+       10:  101:inline _LIBCPP_HIDE_FROM_ABI void __libcpp_deallocate(
+        -:  102:    __type_identity_t<_Tp>* __ptr, __element_count __n, size_t __align = _LIBCPP_ALIGNOF(_Tp)) _NOEXCEPT {
+       10:  103:  size_t __size = static_cast<size_t>(__n) * sizeof(_Tp);
+        -:  104:  (void)__size;
+        -:  105:#if !_LIBCPP_HAS_ALIGNED_ALLOCATION
+        -:  106:  (void)__align;
+       10:  107:  return std::__libcpp_operator_delete(__ptr _LIBCPP_ONLY_IF_SIZED_DEALLOCATION(, __size));
+        -:  108:#else
+        -:  109:  if (__is_overaligned_for_new(__align)) {
+        -:  110:    const align_val_t __align_val = static_cast<align_val_t>(__align);
+        -:  111:    return std::__libcpp_operator_delete(__ptr _LIBCPP_ONLY_IF_SIZED_DEALLOCATION(, __size), __align_val);
+        -:  112:  } else {
+        -:  113:    return std::__libcpp_operator_delete(__ptr _LIBCPP_ONLY_IF_SIZED_DEALLOCATION(, __size));
+        -:  114:  }
+        -:  115:#endif
+        -:  116:}
+        -:  117:
+        -:  118:#undef _LIBCPP_ONLY_IF_SIZED_DEALLOCATION
+        -:  119:
+        -:  120:template <class _Tp>
+        -:  121:inline _LIBCPP_HIDE_FROM_ABI void
+        -:  122:__libcpp_deallocate_unsized(__type_identity_t<_Tp>* __ptr, size_t __align = _LIBCPP_ALIGNOF(_Tp)) _NOEXCEPT {
+        -:  123:#if !_LIBCPP_HAS_ALIGNED_ALLOCATION
+        -:  124:  (void)__align;
+        -:  125:  return std::__libcpp_operator_delete(__ptr);
+        -:  126:#else
+        -:  127:  if (__is_overaligned_for_new(__align)) {
+        -:  128:    const align_val_t __align_val = static_cast<align_val_t>(__align);
+        -:  129:    return std::__libcpp_operator_delete(__ptr, __align_val);
+        -:  130:  } else {
+        -:  131:    return std::__libcpp_operator_delete(__ptr);
+        -:  132:  }
+        -:  133:#endif
+        -:  134:}
+        -:  135:_LIBCPP_END_NAMESPACE_STD
+        -:  136:
+        -:  137:#endif // _LIBCPP___NEW_ALLOCATE_H

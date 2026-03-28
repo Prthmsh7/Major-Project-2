@@ -32,29 +32,29 @@
         -:   27:
         -:   28:template <class _CharT, class _Traits>
         -:   29:_LIBCPP_HIDE_FROM_ABI basic_ostream<_CharT, _Traits>&
-        3:   30:__put_character_sequence(basic_ostream<_CharT, _Traits>& __os, const _CharT* __str, size_t __len) {
+        1:   30:__put_character_sequence(basic_ostream<_CharT, _Traits>& __os, const _CharT* __str, size_t __len) {
         -:   31:#  if _LIBCPP_HAS_EXCEPTIONS
         -:   32:  try {
         -:   33:#  endif // _LIBCPP_HAS_EXCEPTIONS
-        3:   34:    typename basic_ostream<_CharT, _Traits>::sentry __s(__os);
-        3:   35:    if (__s) {
+        1:   34:    typename basic_ostream<_CharT, _Traits>::sentry __s(__os);
+        1:   35:    if (__s) {
         -:   36:      typedef ostreambuf_iterator<_CharT, _Traits> _Ip;
-        3:   37:      if (std::__pad_and_output(
-        3:   38:              _Ip(__os),
-        3:   39:              __str,
-        3:   40:              (__os.flags() & ios_base::adjustfield) == ios_base::left ? __str + __len : __str,
-        3:   41:              __str + __len,
-        3:   42:              __os,
-        3:   43:              __os.fill())
-        3:   44:              .failed())
+        1:   37:      if (std::__pad_and_output(
+        1:   38:              _Ip(__os),
+        1:   39:              __str,
+        1:   40:              (__os.flags() & ios_base::adjustfield) == ios_base::left ? __str + __len : __str,
+        1:   41:              __str + __len,
+        1:   42:              __os,
+        1:   43:              __os.fill())
+        1:   44:              .failed())
     #####:   45:        __os.setstate(ios_base::badbit | ios_base::failbit);
-        3:   46:    }
+        1:   46:    }
         -:   47:#  if _LIBCPP_HAS_EXCEPTIONS
-        3:   48:  } catch (...) {
+        1:   48:  } catch (...) {
     #####:   49:    __os.__set_badbit_and_consider_rethrow();
     #####:   50:  }
         -:   51:#  endif // _LIBCPP_HAS_EXCEPTIONS
-        3:   52:  return __os;
+        1:   52:  return __os;
     #####:   53:}
         -:   54:
         -:   55:_LIBCPP_END_NAMESPACE_STD
