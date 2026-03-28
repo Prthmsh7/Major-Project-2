@@ -9,7 +9,7 @@ Name
 A CLI tool that compiles C++ code with coverage, runs tests, identifies uncovered statements, asks an LLM to generate inputs, and iteratively improves statement coverage.
 
 source venv/bin/activate
-export GOOGLE_API_KEY='AIzaSyCc8jaevgJ91cyYeObI9liB8uVUtWtY9Vk'
+export GOOGLE_API_KEY='gemini-api-key'
 
 python -m cli.main --source samples/math_ops.cpp --max-iters 5
 python -m cli.main --source samples/advanced_logic.cpp --max-iters 3
