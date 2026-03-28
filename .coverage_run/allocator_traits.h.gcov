@@ -1,0 +1,419 @@
+        -:    0:Source:/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__memory/allocator_traits.h
+        -:    0:Graph:test_main.gcno
+        -:    0:Data:test_main.gcda
+        -:    0:Runs:1
+        -:    0:Programs:1
+        -:    1:// -*- C++ -*-
+        -:    2://===----------------------------------------------------------------------===//
+        -:    3://
+        -:    4:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+        -:    5:// See https://llvm.org/LICENSE.txt for license information.
+        -:    6:// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
+        -:    7://
+        -:    8://===----------------------------------------------------------------------===//
+        -:    9:
+        -:   10:#ifndef _LIBCPP___MEMORY_ALLOCATOR_TRAITS_H
+        -:   11:#define _LIBCPP___MEMORY_ALLOCATOR_TRAITS_H
+        -:   12:
+        -:   13:#include <__config>
+        -:   14:#include <__cstddef/size_t.h>
+        -:   15:#include <__fwd/memory.h>
+        -:   16:#include <__memory/construct_at.h>
+        -:   17:#include <__memory/pointer_traits.h>
+        -:   18:#include <__type_traits/detected_or.h>
+        -:   19:#include <__type_traits/enable_if.h>
+        -:   20:#include <__type_traits/is_constructible.h>
+        -:   21:#include <__type_traits/is_empty.h>
+        -:   22:#include <__type_traits/is_same.h>
+        -:   23:#include <__type_traits/make_unsigned.h>
+        -:   24:#include <__type_traits/remove_reference.h>
+        -:   25:#include <__type_traits/void_t.h>
+        -:   26:#include <__utility/declval.h>
+        -:   27:#include <__utility/forward.h>
+        -:   28:#include <limits>
+        -:   29:
+        -:   30:#if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)
+        -:   31:#  pragma GCC system_header
+        -:   32:#endif
+        -:   33:
+        -:   34:_LIBCPP_PUSH_MACROS
+        -:   35:#include <__undef_macros>
+        -:   36:
+        -:   37:_LIBCPP_BEGIN_NAMESPACE_STD
+        -:   38:
+        -:   39:#define _LIBCPP_ALLOCATOR_TRAITS_HAS_XXX(NAME, PROPERTY)                                                               \
+        -:   40:  template <class _Tp, class = void>                                                                                   \
+        -:   41:  struct NAME : false_type {};                                                                                         \
+        -:   42:  template <class _Tp>                                                                                                 \
+        -:   43:  struct NAME<_Tp, __void_t<typename _Tp::PROPERTY > > : true_type {}
+        -:   44:
+        -:   45:// __pointer
+        -:   46:template <class _Tp>
+        -:   47:using __pointer_member _LIBCPP_NODEBUG = typename _Tp::pointer;
+        -:   48:
+        -:   49:template <class _Tp, class _Alloc>
+        -:   50:using __pointer _LIBCPP_NODEBUG = __detected_or_t<_Tp*, __pointer_member, __libcpp_remove_reference_t<_Alloc> >;
+        -:   51:
+        -:   52:// __const_pointer
+        -:   53:_LIBCPP_ALLOCATOR_TRAITS_HAS_XXX(__has_const_pointer, const_pointer);
+        -:   54:template <class _Tp, class _Ptr, class _Alloc, bool = __has_const_pointer<_Alloc>::value>
+        -:   55:struct __const_pointer {
+        -:   56:  using type _LIBCPP_NODEBUG = typename _Alloc::const_pointer;
+        -:   57:};
+        -:   58:template <class _Tp, class _Ptr, class _Alloc>
+        -:   59:struct __const_pointer<_Tp, _Ptr, _Alloc, false> {
+        -:   60:#ifdef _LIBCPP_CXX03_LANG
+        -:   61:  using type _LIBCPP_NODEBUG = typename pointer_traits<_Ptr>::template rebind<const _Tp>::other;
+        -:   62:#else
+        -:   63:  using type _LIBCPP_NODEBUG = typename pointer_traits<_Ptr>::template rebind<const _Tp>;
+        -:   64:#endif
+        -:   65:};
+        -:   66:
+        -:   67:// __void_pointer
+        -:   68:_LIBCPP_ALLOCATOR_TRAITS_HAS_XXX(__has_void_pointer, void_pointer);
+        -:   69:template <class _Ptr, class _Alloc, bool = __has_void_pointer<_Alloc>::value>
+        -:   70:struct __void_pointer {
+        -:   71:  using type _LIBCPP_NODEBUG = typename _Alloc::void_pointer;
+        -:   72:};
+        -:   73:template <class _Ptr, class _Alloc>
+        -:   74:struct __void_pointer<_Ptr, _Alloc, false> {
+        -:   75:#ifdef _LIBCPP_CXX03_LANG
+        -:   76:  using type _LIBCPP_NODEBUG = typename pointer_traits<_Ptr>::template rebind<void>::other;
+        -:   77:#else
+        -:   78:  using type _LIBCPP_NODEBUG = typename pointer_traits<_Ptr>::template rebind<void>;
+        -:   79:#endif
+        -:   80:};
+        -:   81:
+        -:   82:// __const_void_pointer
+        -:   83:_LIBCPP_ALLOCATOR_TRAITS_HAS_XXX(__has_const_void_pointer, const_void_pointer);
+        -:   84:template <class _Ptr, class _Alloc, bool = __has_const_void_pointer<_Alloc>::value>
+        -:   85:struct __const_void_pointer {
+        -:   86:  using type _LIBCPP_NODEBUG = typename _Alloc::const_void_pointer;
+        -:   87:};
+        -:   88:template <class _Ptr, class _Alloc>
+        -:   89:struct __const_void_pointer<_Ptr, _Alloc, false> {
+        -:   90:#ifdef _LIBCPP_CXX03_LANG
+        -:   91:  using type _LIBCPP_NODEBUG = typename pointer_traits<_Ptr>::template rebind<const void>::other;
+        -:   92:#else
+        -:   93:  using type _LIBCPP_NODEBUG = typename pointer_traits<_Ptr>::template rebind<const void>;
+        -:   94:#endif
+        -:   95:};
+        -:   96:
+        -:   97:// __size_type
+        -:   98:template <class _Tp>
+        -:   99:using __size_type_member _LIBCPP_NODEBUG = typename _Tp::size_type;
+        -:  100:
+        -:  101:template <class _Alloc, class _DiffType>
+        -:  102:using __size_type _LIBCPP_NODEBUG = __detected_or_t<__make_unsigned_t<_DiffType>, __size_type_member, _Alloc>;
+        -:  103:
+        -:  104:// __alloc_traits_difference_type
+        -:  105:_LIBCPP_ALLOCATOR_TRAITS_HAS_XXX(__has_alloc_traits_difference_type, difference_type);
+        -:  106:template <class _Alloc, class _Ptr, bool = __has_alloc_traits_difference_type<_Alloc>::value>
+        -:  107:struct __alloc_traits_difference_type {
+        -:  108:  using type _LIBCPP_NODEBUG = typename pointer_traits<_Ptr>::difference_type;
+        -:  109:};
+        -:  110:template <class _Alloc, class _Ptr>
+        -:  111:struct __alloc_traits_difference_type<_Alloc, _Ptr, true> {
+        -:  112:  using type _LIBCPP_NODEBUG = typename _Alloc::difference_type;
+        -:  113:};
+        -:  114:
+        -:  115:// __propagate_on_container_copy_assignment
+        -:  116:template <class _Tp>
+        -:  117:using __propagate_on_container_copy_assignment_member _LIBCPP_NODEBUG =
+        -:  118:    typename _Tp::propagate_on_container_copy_assignment;
+        -:  119:
+        -:  120:template <class _Alloc>
+        -:  121:using __propagate_on_container_copy_assignment _LIBCPP_NODEBUG =
+        -:  122:    __detected_or_t<false_type, __propagate_on_container_copy_assignment_member, _Alloc>;
+        -:  123:
+        -:  124:// __propagate_on_container_move_assignment
+        -:  125:template <class _Tp>
+        -:  126:using __propagate_on_container_move_assignment_member _LIBCPP_NODEBUG =
+        -:  127:    typename _Tp::propagate_on_container_move_assignment;
+        -:  128:
+        -:  129:template <class _Alloc>
+        -:  130:using __propagate_on_container_move_assignment _LIBCPP_NODEBUG =
+        -:  131:    __detected_or_t<false_type, __propagate_on_container_move_assignment_member, _Alloc>;
+        -:  132:
+        -:  133:// __propagate_on_container_swap
+        -:  134:template <class _Tp>
+        -:  135:using __propagate_on_container_swap_member _LIBCPP_NODEBUG = typename _Tp::propagate_on_container_swap;
+        -:  136:
+        -:  137:template <class _Alloc>
+        -:  138:using __propagate_on_container_swap _LIBCPP_NODEBUG =
+        -:  139:    __detected_or_t<false_type, __propagate_on_container_swap_member, _Alloc>;
+        -:  140:
+        -:  141:// __is_always_equal
+        -:  142:template <class _Tp>
+        -:  143:using __is_always_equal_member _LIBCPP_NODEBUG = typename _Tp::is_always_equal;
+        -:  144:
+        -:  145:template <class _Alloc>
+        -:  146:using __is_always_equal _LIBCPP_NODEBUG =
+        -:  147:    __detected_or_t<typename is_empty<_Alloc>::type, __is_always_equal_member, _Alloc>;
+        -:  148:
+        -:  149:// __allocator_traits_rebind
+        -:  150:_LIBCPP_SUPPRESS_DEPRECATED_PUSH
+        -:  151:template <class _Tp, class _Up, class = void>
+        -:  152:struct __has_rebind_other : false_type {};
+        -:  153:template <class _Tp, class _Up>
+        -:  154:struct __has_rebind_other<_Tp, _Up, __void_t<typename _Tp::template rebind<_Up>::other> > : true_type {};
+        -:  155:
+        -:  156:template <class _Tp, class _Up, bool = __has_rebind_other<_Tp, _Up>::value>
+        -:  157:struct __allocator_traits_rebind {
+        -:  158:  static_assert(__has_rebind_other<_Tp, _Up>::value, "This allocator has to implement rebind");
+        -:  159:  using type _LIBCPP_NODEBUG = typename _Tp::template rebind<_Up>::other;
+        -:  160:};
+        -:  161:template <template <class, class...> class _Alloc, class _Tp, class... _Args, class _Up>
+        -:  162:struct __allocator_traits_rebind<_Alloc<_Tp, _Args...>, _Up, true> {
+        -:  163:  using type _LIBCPP_NODEBUG = typename _Alloc<_Tp, _Args...>::template rebind<_Up>::other;
+        -:  164:};
+        -:  165:template <template <class, class...> class _Alloc, class _Tp, class... _Args, class _Up>
+        -:  166:struct __allocator_traits_rebind<_Alloc<_Tp, _Args...>, _Up, false> {
+        -:  167:  using type _LIBCPP_NODEBUG = _Alloc<_Up, _Args...>;
+        -:  168:};
+        -:  169:_LIBCPP_SUPPRESS_DEPRECATED_POP
+        -:  170:
+        -:  171:template <class _Alloc, class _Tp>
+        -:  172:using __allocator_traits_rebind_t _LIBCPP_NODEBUG = typename __allocator_traits_rebind<_Alloc, _Tp>::type;
+        -:  173:
+        -:  174:_LIBCPP_SUPPRESS_DEPRECATED_PUSH
+        -:  175:
+        -:  176:// __has_allocate_hint
+        -:  177:template <class _Alloc, class _SizeType, class _ConstVoidPtr, class = void>
+        -:  178:struct __has_allocate_hint : false_type {};
+        -:  179:
+        -:  180:template <class _Alloc, class _SizeType, class _ConstVoidPtr>
+        -:  181:struct __has_allocate_hint<
+        -:  182:    _Alloc,
+        -:  183:    _SizeType,
+        -:  184:    _ConstVoidPtr,
+        -:  185:    decltype((void)std::declval<_Alloc>().allocate(std::declval<_SizeType>(), std::declval<_ConstVoidPtr>()))>
+        -:  186:    : true_type {};
+        -:  187:
+        -:  188:// __has_construct
+        -:  189:template <class, class _Alloc, class... _Args>
+        -:  190:struct __has_construct_impl : false_type {};
+        -:  191:
+        -:  192:template <class _Alloc, class... _Args>
+        -:  193:struct __has_construct_impl<decltype((void)std::declval<_Alloc>().construct(std::declval<_Args>()...)),
+        -:  194:                            _Alloc,
+        -:  195:                            _Args...> : true_type {};
+        -:  196:
+        -:  197:template <class _Alloc, class... _Args>
+        -:  198:struct __has_construct : __has_construct_impl<void, _Alloc, _Args...> {};
+        -:  199:
+        -:  200:// __has_destroy
+        -:  201:template <class _Alloc, class _Pointer, class = void>
+        -:  202:struct __has_destroy : false_type {};
+        -:  203:
+        -:  204:template <class _Alloc, class _Pointer>
+        -:  205:struct __has_destroy<_Alloc, _Pointer, decltype((void)std::declval<_Alloc>().destroy(std::declval<_Pointer>()))>
+        -:  206:    : true_type {};
+        -:  207:
+        -:  208:// __has_max_size
+        -:  209:template <class _Alloc, class = void>
+        -:  210:struct __has_max_size : false_type {};
+        -:  211:
+        -:  212:template <class _Alloc>
+        -:  213:struct __has_max_size<_Alloc, decltype((void)std::declval<_Alloc&>().max_size())> : true_type {};
+        -:  214:
+        -:  215:// __has_select_on_container_copy_construction
+        -:  216:template <class _Alloc, class = void>
+        -:  217:struct __has_select_on_container_copy_construction : false_type {};
+        -:  218:
+        -:  219:template <class _Alloc>
+        -:  220:struct __has_select_on_container_copy_construction<
+        -:  221:    _Alloc,
+        -:  222:    decltype((void)std::declval<_Alloc>().select_on_container_copy_construction())> : true_type {};
+        -:  223:
+        -:  224:_LIBCPP_SUPPRESS_DEPRECATED_POP
+        -:  225:
+        -:  226:#if _LIBCPP_STD_VER >= 23
+        -:  227:
+        -:  228:template <class _Pointer, class _SizeType = size_t>
+        -:  229:struct allocation_result {
+        -:  230:  _Pointer ptr;
+        -:  231:  _SizeType count;
+        -:  232:};
+        -:  233:_LIBCPP_CTAD_SUPPORTED_FOR_TYPE(allocation_result);
+        -:  234:
+        -:  235:#endif // _LIBCPP_STD_VER
+        -:  236:
+        -:  237:template <class _Alloc>
+        -:  238:struct _LIBCPP_TEMPLATE_VIS allocator_traits {
+        -:  239:  using allocator_type                         = _Alloc;
+        -:  240:  using value_type                             = typename allocator_type::value_type;
+        -:  241:  using pointer                                = __pointer<value_type, allocator_type>;
+        -:  242:  using const_pointer                          = typename __const_pointer<value_type, pointer, allocator_type>::type;
+        -:  243:  using void_pointer                           = typename __void_pointer<pointer, allocator_type>::type;
+        -:  244:  using const_void_pointer                     = typename __const_void_pointer<pointer, allocator_type>::type;
+        -:  245:  using difference_type                        = typename __alloc_traits_difference_type<allocator_type, pointer>::type;
+        -:  246:  using size_type                              = __size_type<allocator_type, difference_type>;
+        -:  247:  using propagate_on_container_copy_assignment = __propagate_on_container_copy_assignment<allocator_type>;
+        -:  248:  using propagate_on_container_move_assignment = __propagate_on_container_move_assignment<allocator_type>;
+        -:  249:  using propagate_on_container_swap            = __propagate_on_container_swap<allocator_type>;
+        -:  250:  using is_always_equal                        = __is_always_equal<allocator_type>;
+        -:  251:
+        -:  252:#ifndef _LIBCPP_CXX03_LANG
+        -:  253:  template <class _Tp>
+        -:  254:  using rebind_alloc = __allocator_traits_rebind_t<allocator_type, _Tp>;
+        -:  255:  template <class _Tp>
+        -:  256:  using rebind_traits = allocator_traits<rebind_alloc<_Tp> >;
+        -:  257:#else  // _LIBCPP_CXX03_LANG
+        -:  258:  template <class _Tp>
+        -:  259:  struct rebind_alloc {
+        -:  260:    using other = __allocator_traits_rebind_t<allocator_type, _Tp>;
+        -:  261:  };
+        -:  262:  template <class _Tp>
+        -:  263:  struct rebind_traits {
+        -:  264:    using other = allocator_traits<typename rebind_alloc<_Tp>::other>;
+        -:  265:  };
+        -:  266:#endif // _LIBCPP_CXX03_LANG
+        -:  267:
+        -:  268:  [[__nodiscard__]] _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static pointer
+        -:  269:  allocate(allocator_type& __a, size_type __n) {
+        -:  270:    return __a.allocate(__n);
+        -:  271:  }
+        -:  272:
+        -:  273:  template <class _Ap = _Alloc, __enable_if_t<__has_allocate_hint<_Ap, size_type, const_void_pointer>::value, int> = 0>
+        -:  274:  [[__nodiscard__]] _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static pointer
+        -:  275:  allocate(allocator_type& __a, size_type __n, const_void_pointer __hint) {
+        -:  276:    _LIBCPP_SUPPRESS_DEPRECATED_PUSH
+        -:  277:    return __a.allocate(__n, __hint);
+        -:  278:    _LIBCPP_SUPPRESS_DEPRECATED_POP
+        -:  279:  }
+        -:  280:  template <class _Ap                                                                           = _Alloc,
+        -:  281:            class                                                                               = void,
+        -:  282:            __enable_if_t<!__has_allocate_hint<_Ap, size_type, const_void_pointer>::value, int> = 0>
+        -:  283:  [[__nodiscard__]] _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static pointer
+        -:  284:  allocate(allocator_type& __a, size_type __n, const_void_pointer) {
+        -:  285:    return __a.allocate(__n);
+        -:  286:  }
+        -:  287:
+        -:  288:#if _LIBCPP_STD_VER >= 23
+        -:  289:  template <class _Ap = _Alloc>
+        -:  290:  [[nodiscard]] _LIBCPP_HIDE_FROM_ABI static constexpr allocation_result<pointer, size_type>
+        -:  291:  allocate_at_least(_Ap& __alloc, size_type __n) {
+        -:  292:    if constexpr (requires { __alloc.allocate_at_least(__n); }) {
+        -:  293:      return __alloc.allocate_at_least(__n);
+        -:  294:    } else {
+        -:  295:      return {__alloc.allocate(__n), __n};
+        -:  296:    }
+        -:  297:  }
+        -:  298:#endif
+        -:  299:
+        -:  300:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static void
+       10:  301:  deallocate(allocator_type& __a, pointer __p, size_type __n) _NOEXCEPT {
+       10:  302:    __a.deallocate(__p, __n);
+       10:  303:  }
+        -:  304:
+        -:  305:  template <class _Tp, class... _Args, __enable_if_t<__has_construct<allocator_type, _Tp*, _Args...>::value, int> = 0>
+        -:  306:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static void
+       20:  307:  construct(allocator_type& __a, _Tp* __p, _Args&&... __args) {
+        -:  308:    _LIBCPP_SUPPRESS_DEPRECATED_PUSH
+       20:  309:    __a.construct(__p, std::forward<_Args>(__args)...);
+        -:  310:    _LIBCPP_SUPPRESS_DEPRECATED_POP
+       20:  311:  }
+        -:  312:  template <class _Tp,
+        -:  313:            class... _Args,
+        -:  314:            class                                                                       = void,
+        -:  315:            __enable_if_t<!__has_construct<allocator_type, _Tp*, _Args...>::value, int> = 0>
+        -:  316:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static void
+        -:  317:  construct(allocator_type&, _Tp* __p, _Args&&... __args) {
+        -:  318:    std::__construct_at(__p, std::forward<_Args>(__args)...);
+        -:  319:  }
+        -:  320:
+        -:  321:  template <class _Tp, __enable_if_t<__has_destroy<allocator_type, _Tp*>::value, int> = 0>
+       20:  322:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static void destroy(allocator_type& __a, _Tp* __p) {
+        -:  323:    _LIBCPP_SUPPRESS_DEPRECATED_PUSH
+       20:  324:    __a.destroy(__p);
+        -:  325:    _LIBCPP_SUPPRESS_DEPRECATED_POP
+       20:  326:  }
+        -:  327:  template <class _Tp, class = void, __enable_if_t<!__has_destroy<allocator_type, _Tp*>::value, int> = 0>
+        -:  328:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static void destroy(allocator_type&, _Tp* __p) {
+        -:  329:    std::__destroy_at(__p);
+        -:  330:  }
+        -:  331:
+        -:  332:  template <class _Ap = _Alloc, __enable_if_t<__has_max_size<const _Ap>::value, int> = 0>
+       20:  333:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static size_type max_size(const allocator_type& __a) _NOEXCEPT {
+        -:  334:    _LIBCPP_SUPPRESS_DEPRECATED_PUSH
+       20:  335:    return __a.max_size();
+        -:  336:    _LIBCPP_SUPPRESS_DEPRECATED_POP
+        -:  337:  }
+        -:  338:  template <class _Ap = _Alloc, class = void, __enable_if_t<!__has_max_size<const _Ap>::value, int> = 0>
+        -:  339:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static size_type max_size(const allocator_type&) _NOEXCEPT {
+        -:  340:    return numeric_limits<size_type>::max() / sizeof(value_type);
+        -:  341:  }
+        -:  342:
+        -:  343:  template <class _Ap = _Alloc, __enable_if_t<__has_select_on_container_copy_construction<const _Ap>::value, int> = 0>
+        -:  344:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static allocator_type
+        -:  345:  select_on_container_copy_construction(const allocator_type& __a) {
+        -:  346:    return __a.select_on_container_copy_construction();
+        -:  347:  }
+        -:  348:  template <class _Ap                                                                          = _Alloc,
+        -:  349:            class                                                                              = void,
+        -:  350:            __enable_if_t<!__has_select_on_container_copy_construction<const _Ap>::value, int> = 0>
+        -:  351:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static allocator_type
+        -:  352:  select_on_container_copy_construction(const allocator_type& __a) {
+        -:  353:    return __a;
+        -:  354:  }
+        -:  355:};
+        -:  356:
+        -:  357:#ifndef _LIBCPP_CXX03_LANG
+        -:  358:template <class _Traits, class _Tp>
+        -:  359:using __rebind_alloc _LIBCPP_NODEBUG = typename _Traits::template rebind_alloc<_Tp>;
+        -:  360:#else
+        -:  361:template <class _Traits, class _Tp>
+        -:  362:using __rebind_alloc _LIBCPP_NODEBUG = typename _Traits::template rebind_alloc<_Tp>::other;
+        -:  363:#endif
+        -:  364:
+        -:  365:template <class _Alloc>
+        -:  366:struct __check_valid_allocator : true_type {
+        -:  367:  using _Traits _LIBCPP_NODEBUG = std::allocator_traits<_Alloc>;
+        -:  368:  static_assert(is_same<_Alloc, __rebind_alloc<_Traits, typename _Traits::value_type> >::value,
+        -:  369:                "[allocator.requirements] states that rebinding an allocator to the same type should result in the "
+        -:  370:                "original allocator");
+        -:  371:};
+        -:  372:
+        -:  373:// __is_default_allocator
+        -:  374:template <class _Tp>
+        -:  375:struct __is_default_allocator : false_type {};
+        -:  376:
+        -:  377:template <class>
+        -:  378:class allocator;
+        -:  379:
+        -:  380:template <class _Tp>
+        -:  381:struct __is_default_allocator<allocator<_Tp> > : true_type {};
+        -:  382:
+        -:  383:// __is_cpp17_move_insertable
+        -:  384:template <class _Alloc, class = void>
+        -:  385:struct __is_cpp17_move_insertable : is_move_constructible<typename _Alloc::value_type> {};
+        -:  386:
+        -:  387:template <class _Alloc>
+        -:  388:struct __is_cpp17_move_insertable<
+        -:  389:    _Alloc,
+        -:  390:    __enable_if_t< !__is_default_allocator<_Alloc>::value &&
+        -:  391:                   __has_construct<_Alloc, typename _Alloc::value_type*, typename _Alloc::value_type&&>::value > >
+        -:  392:    : true_type {};
+        -:  393:
+        -:  394:// __is_cpp17_copy_insertable
+        -:  395:template <class _Alloc, class = void>
+        -:  396:struct __is_cpp17_copy_insertable
+        -:  397:    : integral_constant<bool,
+        -:  398:                        is_copy_constructible<typename _Alloc::value_type>::value &&
+        -:  399:                            __is_cpp17_move_insertable<_Alloc>::value > {};
+        -:  400:
+        -:  401:template <class _Alloc>
+        -:  402:struct __is_cpp17_copy_insertable<
+        -:  403:    _Alloc,
+        -:  404:    __enable_if_t< !__is_default_allocator<_Alloc>::value &&
+        -:  405:                   __has_construct<_Alloc, typename _Alloc::value_type*, const typename _Alloc::value_type&>::value > >
+        -:  406:    : __is_cpp17_move_insertable<_Alloc> {};
+        -:  407:
+        -:  408:#undef _LIBCPP_ALLOCATOR_TRAITS_HAS_XXX
+        -:  409:
+        -:  410:_LIBCPP_END_NAMESPACE_STD
+        -:  411:
+        -:  412:_LIBCPP_POP_MACROS
+        -:  413:
+        -:  414:#endif // _LIBCPP___MEMORY_ALLOCATOR_TRAITS_H
