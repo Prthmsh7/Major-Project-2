@@ -58,7 +58,7 @@
         -:   53:  streambuf_type* __sbuf_;
         -:   54:
         -:   55:public:
-        2:   56:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator(ostream_type& __s) _NOEXCEPT : __sbuf_(__s.rdbuf()) {}
+        6:   56:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator(ostream_type& __s) _NOEXCEPT : __sbuf_(__s.rdbuf()) {}
         -:   57:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator(streambuf_type* __s) _NOEXCEPT : __sbuf_(__s) {}
         -:   58:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator& operator=(_CharT __c) {
         -:   59:    if (__sbuf_ && traits_type::eq_int_type(__sbuf_->sputc(__c), traits_type::eof()))
@@ -68,7 +68,7 @@
         -:   63:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator& operator*() { return *this; }
         -:   64:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator& operator++() { return *this; }
         -:   65:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator& operator++(int) { return *this; }
-        1:   66:  _LIBCPP_HIDE_FROM_ABI bool failed() const _NOEXCEPT { return __sbuf_ == nullptr; }
+        3:   66:  _LIBCPP_HIDE_FROM_ABI bool failed() const _NOEXCEPT { return __sbuf_ == nullptr; }
         -:   67:
         -:   68:#if _LIBCPP_HAS_LOCALIZATION
         -:   69:  template <class _Ch, class _Tr>

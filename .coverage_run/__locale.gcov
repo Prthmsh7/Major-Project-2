@@ -173,8 +173,8 @@
         -:  168:}
         -:  169:
         -:  170:template <class _Facet>
-        1:  171:inline _LIBCPP_HIDE_FROM_ABI const _Facet& use_facet(const locale& __l) {
-        1:  172:  return static_cast<const _Facet&>(*__l.use_facet(_Facet::id));
+        3:  171:inline _LIBCPP_HIDE_FROM_ABI const _Facet& use_facet(const locale& __l) {
+        3:  172:  return static_cast<const _Facet&>(*__l.use_facet(_Facet::id));
         -:  173:}
         -:  174:
         -:  175:// template <class _CharT> class collate;
@@ -573,7 +573,7 @@
         -:  568:    return do_tolower(__low, __high);
         -:  569:  }
         -:  570:
-        1:  571:  _LIBCPP_HIDE_FROM_ABI char_type widen(char __c) const { return do_widen(__c); }
+        3:  571:  _LIBCPP_HIDE_FROM_ABI char_type widen(char __c) const { return do_widen(__c); }
         -:  572:
         -:  573:  _LIBCPP_HIDE_FROM_ABI const char* widen(const char* __low, const char* __high, char_type* __to) const {
         -:  574:    return do_widen(__low, __high, __to);

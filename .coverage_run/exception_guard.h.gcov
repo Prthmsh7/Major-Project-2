@@ -70,8 +70,8 @@
         -:   65:struct __exception_guard_exceptions {
         -:   66:  __exception_guard_exceptions() = delete;
         -:   67:
-       40:   68:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 explicit __exception_guard_exceptions(_Rollback __rollback)
-       40:   69:      : __rollback_(std::move(__rollback)), __completed_(false) {}
+       32:   68:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 explicit __exception_guard_exceptions(_Rollback __rollback)
+       32:   69:      : __rollback_(std::move(__rollback)), __completed_(false) {}
         -:   70:
         -:   71:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20
         -:   72:  __exception_guard_exceptions(__exception_guard_exceptions&& __other)
@@ -84,12 +84,12 @@
         -:   79:  __exception_guard_exceptions& operator=(__exception_guard_exceptions const&) = delete;
         -:   80:  __exception_guard_exceptions& operator=(__exception_guard_exceptions&&)      = delete;
         -:   81:
-       20:   82:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 void __complete() _NOEXCEPT { __completed_ = true; }
+       16:   82:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 void __complete() _NOEXCEPT { __completed_ = true; }
         -:   83:
-       40:   84:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 ~__exception_guard_exceptions() {
-       20:   85:    if (!__completed_)
+       32:   84:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 ~__exception_guard_exceptions() {
+       16:   85:    if (!__completed_)
     #####:   86:      __rollback_();
-       40:   87:  }
+       32:   87:  }
         -:   88:
         -:   89:private:
         -:   90:  _Rollback __rollback_;
@@ -138,8 +138,8 @@
         -:  133:#endif
         -:  134:
         -:  135:template <class _Rollback>
-       20:  136:_LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR __exception_guard<_Rollback> __make_exception_guard(_Rollback __rollback) {
-       20:  137:  return __exception_guard<_Rollback>(std::move(__rollback));
+       16:  136:_LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR __exception_guard<_Rollback> __make_exception_guard(_Rollback __rollback) {
+       16:  137:  return __exception_guard<_Rollback>(std::move(__rollback));
         -:  138:}
         -:  139:
         -:  140:_LIBCPP_END_NAMESPACE_STD

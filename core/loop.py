@@ -6,13 +6,15 @@ from executor.runner import run_test
 from coverage.parser import run_gcov, parse_gcov
 from llm.client import LLMClient
 from llm.prompter import build_prompt, extract_cpp_code, SYSTEM_PROMPT
-from core.types import CoverageData
+from core.types import CoverageData, CoverageType
 
 class CoverageOptimizer:
-    def __init__(self, source_file: str, max_iters: int = 5, api_key: str = None, model: str = "gemini-2.5-flash"):
+    def __init__(self, source_file: str, max_iters: int = 5, api_key: str = None, model: str = "gemini-2.5-flash", coverage_type: CoverageType = CoverageType.LINE, coverage_threshold: float = 100.0):
         self.source_file = source_file
         self.source_basename = os.path.basename(source_file)
         self.max_iters = max_iters
+        self.coverage_type = coverage_type
+        self.coverage_threshold = coverage_threshold
         self.llm_client = LLMClient(api_key=api_key, model=model)
         
         with open(self.source_file, 'r', encoding='utf-8') as f:
@@ -91,16 +93,20 @@ class CoverageOptimizer:
                 continue
                 
             # 4. Measure Coverage
-            print("Running gcov and measuring coverage...")
-            run_gcov("test_main.cpp", cwd=self.work_dir)
+            print(f"Running gcov and measuring {self.coverage_type.value} coverage...")
+            run_gcov("test_main.cpp", cwd=self.work_dir, coverage_type=self.coverage_type)
             gcov_path = os.path.join(self.work_dir, f"{self.source_basename}.gcov")
             
-            current_coverage = parse_gcov(gcov_path)
-            print(f"Current Statement Coverage: {current_coverage.overall_percentage:.2f}%")
+            current_coverage = parse_gcov(gcov_path, coverage_type=self.coverage_type)
+            print(f"Current {self.coverage_type.value.title()} Coverage: {current_coverage.overall_percentage:.2f}%")
             
             # 5. Check Stopping Criteria
+            if current_coverage.meets_threshold(self.coverage_threshold):
+                print(f"Coverage threshold of {self.coverage_threshold:.1f}% reached! Stopping.")
+                break
+                
             if current_coverage.is_fully_covered:
-                print("100% statement coverage achieved! Stopping.")
+                print("100% coverage achieved! Stopping.")
                 break
                 
             if iteration == self.max_iters:
@@ -108,7 +114,15 @@ class CoverageOptimizer:
                 break
                 
             # 6. Query LLM
-            print(f"Missing coverage on lines: {current_coverage.uncovered_lines}")
+            missing_info = ""
+            if self.coverage_type == CoverageType.LINE:
+                missing_info = f"lines: {current_coverage.uncovered_lines}"
+            elif self.coverage_type == CoverageType.BRANCH:
+                missing_info = f"branches: {current_coverage.uncovered_branches}"
+            elif self.coverage_type == CoverageType.FUNCTION:
+                missing_info = f"functions: {current_coverage.uncovered_functions}"
+                
+            print(f"Missing coverage on {missing_info}")
             print("Querying LLM for new test cases...")
             
             func_name = f"test_llm_gen_{iteration}"

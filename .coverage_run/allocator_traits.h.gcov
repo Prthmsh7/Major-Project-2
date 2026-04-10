@@ -303,17 +303,17 @@
         -:  298:#endif
         -:  299:
         -:  300:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static void
-       10:  301:  deallocate(allocator_type& __a, pointer __p, size_type __n) _NOEXCEPT {
-       10:  302:    __a.deallocate(__p, __n);
-       10:  303:  }
+        8:  301:  deallocate(allocator_type& __a, pointer __p, size_type __n) _NOEXCEPT {
+        8:  302:    __a.deallocate(__p, __n);
+        8:  303:  }
         -:  304:
         -:  305:  template <class _Tp, class... _Args, __enable_if_t<__has_construct<allocator_type, _Tp*, _Args...>::value, int> = 0>
         -:  306:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static void
-       20:  307:  construct(allocator_type& __a, _Tp* __p, _Args&&... __args) {
+       15:  307:  construct(allocator_type& __a, _Tp* __p, _Args&&... __args) {
         -:  308:    _LIBCPP_SUPPRESS_DEPRECATED_PUSH
-       20:  309:    __a.construct(__p, std::forward<_Args>(__args)...);
+       15:  309:    __a.construct(__p, std::forward<_Args>(__args)...);
         -:  310:    _LIBCPP_SUPPRESS_DEPRECATED_POP
-       20:  311:  }
+       15:  311:  }
         -:  312:  template <class _Tp,
         -:  313:            class... _Args,
         -:  314:            class                                                                       = void,
@@ -324,20 +324,20 @@
         -:  319:  }
         -:  320:
         -:  321:  template <class _Tp, __enable_if_t<__has_destroy<allocator_type, _Tp*>::value, int> = 0>
-       20:  322:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static void destroy(allocator_type& __a, _Tp* __p) {
+       15:  322:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static void destroy(allocator_type& __a, _Tp* __p) {
         -:  323:    _LIBCPP_SUPPRESS_DEPRECATED_PUSH
-       20:  324:    __a.destroy(__p);
+       15:  324:    __a.destroy(__p);
         -:  325:    _LIBCPP_SUPPRESS_DEPRECATED_POP
-       20:  326:  }
+       15:  326:  }
         -:  327:  template <class _Tp, class = void, __enable_if_t<!__has_destroy<allocator_type, _Tp*>::value, int> = 0>
         -:  328:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static void destroy(allocator_type&, _Tp* __p) {
         -:  329:    std::__destroy_at(__p);
         -:  330:  }
         -:  331:
         -:  332:  template <class _Ap = _Alloc, __enable_if_t<__has_max_size<const _Ap>::value, int> = 0>
-       20:  333:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static size_type max_size(const allocator_type& __a) _NOEXCEPT {
+       16:  333:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 static size_type max_size(const allocator_type& __a) _NOEXCEPT {
         -:  334:    _LIBCPP_SUPPRESS_DEPRECATED_PUSH
-       20:  335:    return __a.max_size();
+       16:  335:    return __a.max_size();
         -:  336:    _LIBCPP_SUPPRESS_DEPRECATED_POP
         -:  337:  }
         -:  338:  template <class _Ap = _Alloc, class = void, __enable_if_t<!__has_max_size<const _Ap>::value, int> = 0>

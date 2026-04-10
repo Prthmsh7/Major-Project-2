@@ -3,57 +3,34 @@
         -:    0:Data:test_main.gcda
         -:    0:Runs:1
         -:    0:Programs:1
-        -:    1:#include "advanced_logic.cpp"
+        -:    1:#include "math_ops.cpp"
         -:    2:#include <cassert>
         -:    3:#include <iostream>
         -:    4:
-        -:    5:#include <cassert>
-        -:    6:#include <vector>
-        -:    7:#include <string>
+        1:    5:void test_llm_gen_3() {
+        -:    6:    // Cover lines 3, 4, 5 (addition)
+        1:    7:    assert(calculate(5, 3, '+') == 8);
         -:    8:
-        1:    9:void test_llm_gen_1() {
-        -:   10:    // Test adjustScore function
-        -:   11:    // Covers lines: 4, 5, 7, 12, 25 (basic path)
-        1:   12:    assert(adjustScore(50, {10}, false) == 60);
-        -:   13:    // Covers lines: 8, 9 (delta == 0 continue)
-        1:   14:    assert(adjustScore(50, {0, 10}, false) == 60);
-        -:   15:    // Covers lines: 14, 15, 16 (score < 0, break)
-        1:   16:    assert(adjustScore(10, {-20}, false) == 0);
-        -:   17:    // Covers lines: 19, 20, 21 (capToHundred && score > 100, break)
-        1:   18:    assert(adjustScore(90, {20}, true) == 100);
-        -:   19:    // Test a combination to ensure other paths are hit
-        1:   20:    assert(adjustScore(70, {10, 0, 30, -5}, true) == 100); // 70+10=80, 0 skip, 80+30=110 -> 100 (break)
+        -:    9:    // Cover lines 3, 6, 7 (subtraction)
+        1:   10:    assert(calculate(10, 4, '-') == 6);
+        -:   11:
+        -:   12:    // Cover lines 3, 8, 9 (multiplication)
+        1:   13:    assert(calculate(2, 6, '*') == 12);
+        -:   14:
+        -:   15:    // Cover lines 3, 10, 11, 12 (division, b != 0)
+        1:   16:    assert(calculate(20, 5, '/') == 4);
+        -:   17:
+        -:   18:    // Cover lines 3, 10, 13, 14, 15 (division by zero)
+        -:   19:    // This will print "Division by zero!" to std::cout
+        1:   20:    assert(calculate(10, 0, '/') == 0); 
         -:   21:
-        -:   22:    // Test classifyScore function
-        -:   23:    // Covers lines: 28, 29, 30 (score < 0)
-        1:   24:    assert(classifyScore(-1) == "invalid");
-        -:   25:    // Covers lines: 32, 33 (score < 40)
-        1:   26:    assert(classifyScore(0) == "fail");
-        1:   27:    assert(classifyScore(39) == "fail");
-        -:   28:    // Covers lines: 35, 36 (score < 75)
-        1:   29:    assert(classifyScore(40) == "pass");
-        1:   30:    assert(classifyScore(74) == "pass");
-        -:   31:    // Covers lines: 38, 39 (score <= 100)
-        1:   32:    assert(classifyScore(75) == "distinction");
-        1:   33:    assert(classifyScore(100) == "distinction");
-        -:   34:    // Covers lines: 41, 42 (score > 100)
-        1:   35:    assert(classifyScore(101) == "overflow");
-        -:   36:
-        -:   37:    // Test isStrictlyIncreasing function
-        -:   38:    // Covers lines: 44, 45, 46 (empty vector)
-        1:   39:    assert(isStrictlyIncreasing({}) == false);
-        -:   40:    // Covers lines: 44, 49, 55, 56 (single element, loop not entered)
-        1:   41:    assert(isStrictlyIncreasing({5}) == true);
-        -:   42:    // Covers lines: 49, 50, 51 (not strictly increasing, values[i] <= values[i-1])
-        1:   43:    assert(isStrictlyIncreasing({1, 1}) == false);
-        1:   44:    assert(isStrictlyIncreasing({1, 0}) == false);
-        1:   45:    assert(isStrictlyIncreasing({1, 2, 1}) == false);
-        -:   46:    // Covers lines: 44, 49, 53, 55, 56 (strictly increasing)
-        1:   47:    assert(isStrictlyIncreasing({1, 2, 3}) == true);
-        1:   48:}
-        -:   49:
-        1:   50:int main() {
-        1:   51:    test_llm_gen_1();
-        1:   52:    std::cout << "All tests passed successfully!\n";
-        1:   53:    return 0;
-        -:   54:}
+        -:   22:    // Cover lines 3, 18, 19, 20 (unknown operation)
+        -:   23:    // This will print "Unknown operation." to std::cout
+        1:   24:    assert(calculate(7, 2, '%') == 0);
+        1:   25:}
+        -:   26:
+        1:   27:int main() {
+        1:   28:    test_llm_gen_3();
+        1:   29:    std::cout << "All tests passed successfully!\n";
+        1:   30:    return 0;
+        -:   31:}

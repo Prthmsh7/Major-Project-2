@@ -14,3 +14,12 @@ export GOOGLE_API_KEY='gemini-api-key'
 python -m cli.main --source samples/math_ops.cpp --max-iters 5
 python -m cli.main --source samples/advanced_logic.cpp --max-iters 3
 python -m cli.main --source samples/complex.cpp --max-iters 1
+
+# Line coverage with 80% threshold
+python -m cli.main --source samples/math_ops.cpp --coverage-threshold 80.0
+
+# Branch coverage
+python -m cli.main --source samples/math_ops.cpp --coverage-type branch
+
+# Function coverage with 50% threshold
+python -m cli.main --source samples/math_ops.cpp --coverage-type function --coverage-threshold 50.0
