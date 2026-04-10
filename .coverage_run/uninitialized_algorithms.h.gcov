@@ -528,8 +528,8 @@
         -:  523:class _AllocatorDestroyRangeReverse {
         -:  524:public:
         -:  525:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14
-       20:  526:  _AllocatorDestroyRangeReverse(_Alloc& __alloc, _Iter& __first, _Iter& __last)
-       20:  527:      : __alloc_(__alloc), __first_(__first), __last_(__last) {}
+       16:  526:  _AllocatorDestroyRangeReverse(_Alloc& __alloc, _Iter& __first, _Iter& __last)
+       16:  527:      : __alloc_(__alloc), __first_(__first), __last_(__last) {}
         -:  528:
     #####:  529:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 void operator()() const {
     #####:  530:    std::__allocator_destroy(__alloc_, std::reverse_iterator<_Iter>(__last_), std::reverse_iterator<_Iter>(__first_));
@@ -547,18 +547,18 @@
         -:  542:// already copied elements are destroyed in reverse order of their construction.
         -:  543:template <class _Alloc, class _Iter1, class _Sent1, class _Iter2>
         -:  544:_LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 _Iter2
-       10:  545:__uninitialized_allocator_copy_impl(_Alloc& __alloc, _Iter1 __first1, _Sent1 __last1, _Iter2 __first2) {
-       10:  546:  auto __destruct_first = __first2;
+        8:  545:__uninitialized_allocator_copy_impl(_Alloc& __alloc, _Iter1 __first1, _Sent1 __last1, _Iter2 __first2) {
+        8:  546:  auto __destruct_first = __first2;
         -:  547:  auto __guard =
-       10:  548:      std::__make_exception_guard(_AllocatorDestroyRangeReverse<_Alloc, _Iter2>(__alloc, __destruct_first, __first2));
-       30:  549:  while (__first1 != __last1) {
-       20:  550:    allocator_traits<_Alloc>::construct(__alloc, std::__to_address(__first2), *__first1);
-       20:  551:    ++__first1;
-       20:  552:    ++__first2;
+        8:  548:      std::__make_exception_guard(_AllocatorDestroyRangeReverse<_Alloc, _Iter2>(__alloc, __destruct_first, __first2));
+       23:  549:  while (__first1 != __last1) {
+       15:  550:    allocator_traits<_Alloc>::construct(__alloc, std::__to_address(__first2), *__first1);
+       15:  551:    ++__first1;
+       15:  552:    ++__first2;
         -:  553:  }
-       10:  554:  __guard.__complete();
-       10:  555:  return __first2;
-       10:  556:}
+        8:  554:  __guard.__complete();
+        8:  555:  return __first2;
+        8:  556:}
         -:  557:
         -:  558:template <class _Alloc, class _Type>
         -:  559:struct __allocator_has_trivial_copy_construct : _Not<__has_construct<_Alloc, _Type*, const _Type&> > {};
@@ -589,11 +589,11 @@
         -:  584:
         -:  585:template <class _Alloc, class _Iter1, class _Sent1, class _Iter2>
         -:  586:_LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 _Iter2
-       10:  587:__uninitialized_allocator_copy(_Alloc& __alloc, _Iter1 __first1, _Sent1 __last1, _Iter2 __first2) {
-       10:  588:  auto __unwrapped_range = std::__unwrap_range(std::move(__first1), std::move(__last1));
-       10:  589:  auto __result          = std::__uninitialized_allocator_copy_impl(
-       10:  590:      __alloc, std::move(__unwrapped_range.first), std::move(__unwrapped_range.second), std::__unwrap_iter(__first2));
-       10:  591:  return std::__rewrap_iter(__first2, __result);
+        8:  587:__uninitialized_allocator_copy(_Alloc& __alloc, _Iter1 __first1, _Sent1 __last1, _Iter2 __first2) {
+        8:  588:  auto __unwrapped_range = std::__unwrap_range(std::move(__first1), std::move(__last1));
+        8:  589:  auto __result          = std::__uninitialized_allocator_copy_impl(
+        8:  590:      __alloc, std::move(__unwrapped_range.first), std::move(__unwrapped_range.second), std::__unwrap_iter(__first2));
+        8:  591:  return std::__rewrap_iter(__first2, __result);
         -:  592:}
         -:  593:
         -:  594:template <class _Alloc, class _Type>

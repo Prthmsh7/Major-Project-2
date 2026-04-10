@@ -73,7 +73,7 @@
         -:   68:
         -:   69:template <class _Unique>
         -:   70:struct __non_trivial_if<true, _Unique> {
-       19:   71:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR __non_trivial_if() _NOEXCEPT {}
+    #####:   71:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR __non_trivial_if() _NOEXCEPT {}
         -:   72:};
         -:   73:
         -:   74:// allocator
@@ -95,19 +95,19 @@
         -:   90:  _LIBCPP_DEPRECATED_IN_CXX23 typedef true_type is_always_equal;
         -:   91:#endif
         -:   92:
-       38:   93:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 allocator() _NOEXCEPT = default;
+    #####:   93:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 allocator() _NOEXCEPT = default;
         -:   94:
         -:   95:  template <class _Up>
         -:   96:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 allocator(const allocator<_Up>&) _NOEXCEPT {}
         -:   97:
-       10:   98:  [[__nodiscard__]] _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 _Tp* allocate(size_t __n) {
+        -:   98:  [[__nodiscard__]] _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 _Tp* allocate(size_t __n) {
         -:   99:    static_assert(sizeof(_Tp) >= 0, "cannot allocate memory for an incomplete type");
-       10:  100:    if (__n > allocator_traits<allocator>::max_size(*this))
-    #####:  101:      __throw_bad_array_new_length();
+        -:  100:    if (__n > allocator_traits<allocator>::max_size(*this))
+        -:  101:      __throw_bad_array_new_length();
         -:  102:    if (__libcpp_is_constant_evaluated()) {
         -:  103:      return static_cast<_Tp*>(::operator new(__n * sizeof(_Tp)));
         -:  104:    } else {
-       10:  105:      return std::__libcpp_allocate<_Tp>(__element_count(__n));
+        -:  105:      return std::__libcpp_allocate<_Tp>(__element_count(__n));
         -:  106:    }
         -:  107:  }
         -:  108:
@@ -118,13 +118,13 @@
         -:  113:  }
         -:  114:#endif
         -:  115:
-       10:  116:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 void deallocate(_Tp* __p, size_t __n) _NOEXCEPT {
+        -:  116:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 void deallocate(_Tp* __p, size_t __n) _NOEXCEPT {
         -:  117:    if (__libcpp_is_constant_evaluated()) {
         -:  118:      ::operator delete(__p);
         -:  119:    } else {
-       10:  120:      std::__libcpp_deallocate<_Tp>(__p, __element_count(__n));
+        -:  120:      std::__libcpp_deallocate<_Tp>(__p, __element_count(__n));
         -:  121:    }
-       10:  122:  }
+        -:  122:  }
         -:  123:
         -:  124:  // C++20 Removed members
         -:  125:#if _LIBCPP_STD_VER <= 17
@@ -149,16 +149,16 @@
         -:  144:    return allocate(__n);
         -:  145:  }
         -:  146:
-       20:  147:  _LIBCPP_DEPRECATED_IN_CXX17 _LIBCPP_HIDE_FROM_ABI size_type max_size() const _NOEXCEPT {
-       20:  148:    return size_type(~0) / sizeof(_Tp);
+        -:  147:  _LIBCPP_DEPRECATED_IN_CXX17 _LIBCPP_HIDE_FROM_ABI size_type max_size() const _NOEXCEPT {
+        -:  148:    return size_type(~0) / sizeof(_Tp);
         -:  149:  }
         -:  150:
         -:  151:  template <class _Up, class... _Args>
-       20:  152:  _LIBCPP_DEPRECATED_IN_CXX17 _LIBCPP_HIDE_FROM_ABI void construct(_Up* __p, _Args&&... __args) {
-       20:  153:    ::new ((void*)__p) _Up(std::forward<_Args>(__args)...);
-       20:  154:  }
+        -:  152:  _LIBCPP_DEPRECATED_IN_CXX17 _LIBCPP_HIDE_FROM_ABI void construct(_Up* __p, _Args&&... __args) {
+        -:  153:    ::new ((void*)__p) _Up(std::forward<_Args>(__args)...);
+        -:  154:  }
         -:  155:
-       20:  156:  _LIBCPP_DEPRECATED_IN_CXX17 _LIBCPP_HIDE_FROM_ABI void destroy(pointer __p) { __p->~_Tp(); }
+        -:  156:  _LIBCPP_DEPRECATED_IN_CXX17 _LIBCPP_HIDE_FROM_ABI void destroy(pointer __p) { __p->~_Tp(); }
         -:  157:#endif
         -:  158:};
         -:  159:

@@ -229,8 +229,8 @@
         -:  224:    return traits_type::to_int_type(__c);
         -:  225:  }
         -:  226:
-        1:  227:  inline _LIBCPP_HIDE_FROM_ABI_AFTER_V1 streamsize sputn(const char_type* __s, streamsize __n) {
-        1:  228:    return xsputn(__s, __n);
+        3:  227:  inline _LIBCPP_HIDE_FROM_ABI_AFTER_V1 streamsize sputn(const char_type* __s, streamsize __n) {
+        3:  228:    return xsputn(__s, __n);
         -:  229:  }
         -:  230:
         -:  231:protected:

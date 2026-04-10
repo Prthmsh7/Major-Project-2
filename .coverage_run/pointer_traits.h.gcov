@@ -193,9 +193,9 @@
         -:  188:struct __to_address_helper;
         -:  189:
         -:  190:template <class _Tp>
-       80:  191:_LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR _Tp* __to_address(_Tp* __p) _NOEXCEPT {
+    #####:  191:_LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR _Tp* __to_address(_Tp* __p) _NOEXCEPT {
         -:  192:  static_assert(!is_function<_Tp>::value, "_Tp is a function type");
-       80:  193:  return __p;
+    #####:  193:  return __p;
         -:  194:}
         -:  195:
         -:  196:template <class _Pointer, class = void>
@@ -220,16 +220,16 @@
         -:  215:template <class _Pointer, __enable_if_t< _And<is_class<_Pointer>, _IsFancyPointer<_Pointer> >::value, int> = 0>
         -:  216:_LIBCPP_HIDE_FROM_ABI
         -:  217:_LIBCPP_CONSTEXPR __decay_t<decltype(__to_address_helper<_Pointer>::__call(std::declval<const _Pointer&>()))>
-    #####:  218:__to_address(const _Pointer& __p) _NOEXCEPT {
-    #####:  219:  return __to_address_helper<_Pointer>::__call(__p);
+        -:  218:__to_address(const _Pointer& __p) _NOEXCEPT {
+        -:  219:  return __to_address_helper<_Pointer>::__call(__p);
         -:  220:}
         -:  221:
         -:  222:template <class _Pointer, class>
         -:  223:struct __to_address_helper {
         -:  224:  _LIBCPP_HIDE_FROM_ABI
         -:  225:  _LIBCPP_CONSTEXPR static decltype(std::__to_address(std::declval<const _Pointer&>().operator->()))
-    #####:  226:  __call(const _Pointer& __p) _NOEXCEPT {
-    #####:  227:    return std::__to_address(__p.operator->());
+        -:  226:  __call(const _Pointer& __p) _NOEXCEPT {
+        -:  227:    return std::__to_address(__p.operator->());
         -:  228:  }
         -:  229:};
         -:  230:

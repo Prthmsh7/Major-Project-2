@@ -51,7 +51,7 @@
         -:   46:#endif
         -:   47:
         -:   48:template <class _Tp>
-       17:   49:inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 size_t __constexpr_strlen(const _Tp* __str) _NOEXCEPT {
+        3:   49:inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 size_t __constexpr_strlen(const _Tp* __str) _NOEXCEPT {
         -:   50:  static_assert(__is_char_type<_Tp>, "__constexpr_strlen only works with char and char8_t");
         -:   51:  // GCC currently doesn't support __builtin_strlen for heap-allocated memory during constant evaluation.
         -:   52:  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70816
@@ -65,7 +65,7 @@
         -:   60:      ;
         -:   61:    return __i;
         -:   62:  }
-       17:   63:  return __builtin_strlen(reinterpret_cast<const char*>(__str));
+        3:   63:  return __builtin_strlen(reinterpret_cast<const char*>(__str));
         -:   64:}
         -:   65:
         -:   66:// Because of __is_trivially_lexicographically_comparable_v we know that comparing the object representations is

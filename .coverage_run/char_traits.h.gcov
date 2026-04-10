@@ -233,8 +233,8 @@
         -:  228:    }
         -:  229:  }
         -:  230:
-       17:  231:  static inline _LIBCPP_HIDE_FROM_ABI size_t _LIBCPP_CONSTEXPR_SINCE_CXX17 length(const char_type* __s) _NOEXCEPT {
-       17:  232:    return std::__constexpr_strlen(__s);
+        3:  231:  static inline _LIBCPP_HIDE_FROM_ABI size_t _LIBCPP_CONSTEXPR_SINCE_CXX17 length(const char_type* __s) _NOEXCEPT {
+        3:  232:    return std::__constexpr_strlen(__s);
         -:  233:  }
         -:  234:
         -:  235:  static _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX17 const char_type*
@@ -275,7 +275,7 @@
         -:  270:  static inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR bool eq_int_type(int_type __c1, int_type __c2) _NOEXCEPT {
         -:  271:    return __c1 == __c2;
         -:  272:  }
-        1:  273:  static inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR int_type eof() _NOEXCEPT { return int_type(EOF); }
+        3:  273:  static inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR int_type eof() _NOEXCEPT { return int_type(EOF); }
         -:  274:};
         -:  275:
         -:  276:template <class _CharT, class _IntT, _IntT _EOFVal>

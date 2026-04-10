@@ -42,8 +42,8 @@
         -:   37:template <class _Alloc>
         -:   38:[[__nodiscard__]] _LIBCPP_HIDE_FROM_ABI
         -:   39:_LIBCPP_CONSTEXPR __allocation_result<typename allocator_traits<_Alloc>::pointer>
-       10:   40:__allocate_at_least(_Alloc& __alloc, size_t __n) {
-       10:   41:  return {__alloc.allocate(__n), __n};
+        8:   40:__allocate_at_least(_Alloc& __alloc, size_t __n) {
+        8:   41:  return {__alloc.allocate(__n), __n};
         -:   42:}
         -:   43:
         -:   44:#endif // _LIBCPP_STD_VER >= 23

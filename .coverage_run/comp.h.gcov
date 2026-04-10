@@ -42,8 +42,8 @@
         -:   37:template <>
         -:   38:struct __less<void, void> {
         -:   39:  template <class _Tp, class _Up>
-       10:   40:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 bool operator()(const _Tp& __lhs, const _Up& __rhs) const {
-       10:   41:    return __lhs < __rhs;
+        8:   40:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 bool operator()(const _Tp& __lhs, const _Up& __rhs) const {
+        8:   41:    return __lhs < __rhs;
         -:   42:  }
         -:   43:};
         -:   44:

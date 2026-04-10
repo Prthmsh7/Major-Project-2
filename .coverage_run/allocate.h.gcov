@@ -55,9 +55,9 @@
         -:   50:#endif
         -:   51:
         -:   52:template <class _Tp>
-       10:   53:_LIBCPP_HIDE_FROM_ABI void* __libcpp_operator_new(size_t __n) {
+        8:   53:_LIBCPP_HIDE_FROM_ABI void* __libcpp_operator_new(size_t __n) {
         -:   54:#if __has_builtin(__builtin_operator_new) && __has_builtin(__builtin_operator_delete)
-       10:   55:  return __builtin_operator_new(__n _LIBCPP_ADD_TYPE_DESCRIPTOR(_Tp));
+        8:   55:  return __builtin_operator_new(__n _LIBCPP_ADD_TYPE_DESCRIPTOR(_Tp));
         -:   56:#else
         -:   57:  return ::operator new(__n _LIBCPP_ADD_TYPE_DESCRIPTOR(_Tp));
         -:   58:#endif
@@ -73,18 +73,18 @@
         -:   68:}
         -:   69:
         -:   70:template <class... _Args>
-       10:   71:_LIBCPP_HIDE_FROM_ABI void __libcpp_operator_delete(_Args... __args) _NOEXCEPT {
+        8:   71:_LIBCPP_HIDE_FROM_ABI void __libcpp_operator_delete(_Args... __args) _NOEXCEPT {
         -:   72:#if __has_builtin(__builtin_operator_new) && __has_builtin(__builtin_operator_delete)
-       10:   73:  __builtin_operator_delete(__args...);
+        8:   73:  __builtin_operator_delete(__args...);
         -:   74:#else
         -:   75:  ::operator delete(__args...);
         -:   76:#endif
-       10:   77:}
+        8:   77:}
         -:   78:
         -:   79:template <class _Tp>
         -:   80:inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_NO_CFI _Tp*
-       10:   81:__libcpp_allocate(__element_count __n, size_t __align = _LIBCPP_ALIGNOF(_Tp)) {
-       10:   82:  size_t __size = static_cast<size_t>(__n) * sizeof(_Tp);
+        8:   81:__libcpp_allocate(__element_count __n, size_t __align = _LIBCPP_ALIGNOF(_Tp)) {
+        8:   82:  size_t __size = static_cast<size_t>(__n) * sizeof(_Tp);
         -:   83:#if _LIBCPP_HAS_ALIGNED_ALLOCATION
         -:   84:  if (__is_overaligned_for_new(__align)) {
         -:   85:    const align_val_t __align_val = static_cast<align_val_t>(__align);
@@ -93,7 +93,7 @@
         -:   88:#endif
         -:   89:
         -:   90:  (void)__align;
-       10:   91:  return static_cast<_Tp*>(std::__libcpp_operator_new<_Tp>(__size));
+        8:   91:  return static_cast<_Tp*>(std::__libcpp_operator_new<_Tp>(__size));
         -:   92:}
         -:   93:
         -:   94:#if _LIBCPP_HAS_SIZED_DEALLOCATION
@@ -103,13 +103,13 @@
         -:   98:#endif
         -:   99:
         -:  100:template <class _Tp>
-       10:  101:inline _LIBCPP_HIDE_FROM_ABI void __libcpp_deallocate(
+        8:  101:inline _LIBCPP_HIDE_FROM_ABI void __libcpp_deallocate(
         -:  102:    __type_identity_t<_Tp>* __ptr, __element_count __n, size_t __align = _LIBCPP_ALIGNOF(_Tp)) _NOEXCEPT {
-       10:  103:  size_t __size = static_cast<size_t>(__n) * sizeof(_Tp);
+        8:  103:  size_t __size = static_cast<size_t>(__n) * sizeof(_Tp);
         -:  104:  (void)__size;
         -:  105:#if !_LIBCPP_HAS_ALIGNED_ALLOCATION
         -:  106:  (void)__align;
-       10:  107:  return std::__libcpp_operator_delete(__ptr _LIBCPP_ONLY_IF_SIZED_DEALLOCATION(, __size));
+        8:  107:  return std::__libcpp_operator_delete(__ptr _LIBCPP_ONLY_IF_SIZED_DEALLOCATION(, __size));
         -:  108:#else
         -:  109:  if (__is_overaligned_for_new(__align)) {
         -:  110:    const align_val_t __align_val = static_cast<align_val_t>(__align);

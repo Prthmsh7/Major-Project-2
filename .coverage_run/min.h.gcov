@@ -31,14 +31,14 @@
         -:   26:
         -:   27:template <class _Tp, class _Compare>
         -:   28:[[__nodiscard__]] inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 const _Tp&
-       10:   29:min(_LIBCPP_LIFETIMEBOUND const _Tp& __a, _LIBCPP_LIFETIMEBOUND const _Tp& __b, _Compare __comp) {
-       10:   30:  return __comp(__b, __a) ? __b : __a;
+        8:   29:min(_LIBCPP_LIFETIMEBOUND const _Tp& __a, _LIBCPP_LIFETIMEBOUND const _Tp& __b, _Compare __comp) {
+        8:   30:  return __comp(__b, __a) ? __b : __a;
         -:   31:}
         -:   32:
         -:   33:template <class _Tp>
         -:   34:[[__nodiscard__]] inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 const _Tp&
-       10:   35:min(_LIBCPP_LIFETIMEBOUND const _Tp& __a, _LIBCPP_LIFETIMEBOUND const _Tp& __b) {
-       10:   36:  return std::min(__a, __b, __less<>());
+        8:   35:min(_LIBCPP_LIFETIMEBOUND const _Tp& __a, _LIBCPP_LIFETIMEBOUND const _Tp& __b) {
+        8:   36:  return std::min(__a, __b, __less<>());
         -:   37:}
         -:   38:
         -:   39:#ifndef _LIBCPP_CXX03_LANG
