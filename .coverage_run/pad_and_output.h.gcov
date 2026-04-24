@@ -2,7 +2,6 @@
         -:    0:Graph:test_main.gcno
         -:    0:Data:test_main.gcda
         -:    0:Runs:1
-        -:    0:Programs:1
         -:    1://===----------------------------------------------------------------------===//
         -:    2://
         -:    3:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
@@ -46,45 +45,45 @@
         -:   41:}
         -:   42:
         -:   43:template <class _CharT, class _Traits>
-        3:   44:_LIBCPP_HIDE_FROM_ABI ostreambuf_iterator<_CharT, _Traits> __pad_and_output(
+        1:   44:_LIBCPP_HIDE_FROM_ABI ostreambuf_iterator<_CharT, _Traits> __pad_and_output(
         -:   45:    ostreambuf_iterator<_CharT, _Traits> __s,
         -:   46:    const _CharT* __ob,
         -:   47:    const _CharT* __op,
         -:   48:    const _CharT* __oe,
         -:   49:    ios_base& __iob,
         -:   50:    _CharT __fl) {
-        3:   51:  if (__s.__sbuf_ == nullptr)
+        1:   51:  if (__s.__sbuf_ == nullptr)
     #####:   52:    return __s;
-        3:   53:  streamsize __sz = __oe - __ob;
-        3:   54:  streamsize __ns = __iob.width();
-        3:   55:  if (__ns > __sz)
+        1:   53:  streamsize __sz = __oe - __ob;
+        1:   54:  streamsize __ns = __iob.width();
+        1:   55:  if (__ns > __sz)
     #####:   56:    __ns -= __sz;
         -:   57:  else
-        3:   58:    __ns = 0;
-        3:   59:  streamsize __np = __op - __ob;
-        3:   60:  if (__np > 0) {
+        1:   58:    __ns = 0;
+        1:   59:  streamsize __np = __op - __ob;
+        1:   60:  if (__np > 0) {
     #####:   61:    if (__s.__sbuf_->sputn(__ob, __np) != __np) {
     #####:   62:      __s.__sbuf_ = nullptr;
     #####:   63:      return __s;
         -:   64:    }
     #####:   65:  }
-        3:   66:  if (__ns > 0) {
+        1:   66:  if (__ns > 0) {
     #####:   67:    basic_string<_CharT, _Traits> __sp(__ns, __fl);
     #####:   68:    if (__s.__sbuf_->sputn(__sp.data(), __ns) != __ns) {
     #####:   69:      __s.__sbuf_ = nullptr;
     #####:   70:      return __s;
         -:   71:    }
     #####:   72:  }
-        3:   73:  __np = __oe - __op;
-        3:   74:  if (__np > 0) {
-        3:   75:    if (__s.__sbuf_->sputn(__op, __np) != __np) {
+        1:   73:  __np = __oe - __op;
+        1:   74:  if (__np > 0) {
+        1:   75:    if (__s.__sbuf_->sputn(__op, __np) != __np) {
     #####:   76:      __s.__sbuf_ = nullptr;
     #####:   77:      return __s;
         -:   78:    }
-        3:   79:  }
-        3:   80:  __iob.width(0);
-        3:   81:  return __s;
-        3:   82:}
+        1:   79:  }
+        1:   80:  __iob.width(0);
+        1:   81:  return __s;
+        1:   82:}
         -:   83:
         -:   84:_LIBCPP_END_NAMESPACE_STD
         -:   85:

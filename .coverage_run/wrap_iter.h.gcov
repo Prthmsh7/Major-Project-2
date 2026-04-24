@@ -2,7 +2,6 @@
         -:    0:Graph:test_main.gcno
         -:    0:Data:test_main.gcda
         -:    0:Runs:1
-        -:    0:Programs:1
         -:    1:// -*- C++ -*-
         -:    2://===----------------------------------------------------------------------===//
         -:    3://
@@ -62,13 +61,13 @@
         -:   57:                     int> = 0>
         -:   58:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 __wrap_iter(const __wrap_iter<_OtherIter>& __u) _NOEXCEPT
         -:   59:      : __i_(__u.__i_) {}
-        5:   60:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 reference operator*() const _NOEXCEPT { return *__i_; }
+    #####:   60:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 reference operator*() const _NOEXCEPT { return *__i_; }
         -:   61:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 pointer operator->() const _NOEXCEPT {
         -:   62:    return std::__to_address(__i_);
         -:   63:  }
-        3:   64:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 __wrap_iter& operator++() _NOEXCEPT {
-        3:   65:    ++__i_;
-        3:   66:    return *this;
+    #####:   64:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 __wrap_iter& operator++() _NOEXCEPT {
+    #####:   65:    ++__i_;
+    #####:   66:    return *this;
         -:   67:  }
         -:   68:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 __wrap_iter operator++(int) _NOEXCEPT {
         -:   69:    __wrap_iter __tmp(*this);
@@ -105,10 +104,10 @@
         -:  100:    return __i_[__n];
         -:  101:  }
         -:  102:
-       14:  103:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 iterator_type base() const _NOEXCEPT { return __i_; }
+    #####:  103:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 iterator_type base() const _NOEXCEPT { return __i_; }
         -:  104:
         -:  105:private:
-       16:  106:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 explicit __wrap_iter(iterator_type __x) _NOEXCEPT : __i_(__x) {}
+    #####:  106:  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 explicit __wrap_iter(iterator_type __x) _NOEXCEPT : __i_(__x) {}
         -:  107:
         -:  108:  template <class _Up>
         -:  109:  friend class __wrap_iter;
@@ -117,17 +116,17 @@
         -:  112:  template <class _CharT, class _Traits>
         -:  113:  friend class basic_string_view;
         -:  114:  template <class _Tp, class _Alloc>
-        -:  115:  friend class _LIBCPP_TEMPLATE_VIS vector;
+        -:  115:  friend class vector;
         -:  116:  template <class _Tp, size_t>
-        -:  117:  friend class _LIBCPP_TEMPLATE_VIS span;
+        -:  117:  friend class span;
         -:  118:  template <class _Tp, size_t _Size>
         -:  119:  friend struct array;
         -:  120:};
         -:  121:
         -:  122:template <class _Iter1>
         -:  123:_LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR bool
-        7:  124:operator==(const __wrap_iter<_Iter1>& __x, const __wrap_iter<_Iter1>& __y) _NOEXCEPT {
-        7:  125:  return __x.base() == __y.base();
+    #####:  124:operator==(const __wrap_iter<_Iter1>& __x, const __wrap_iter<_Iter1>& __y) _NOEXCEPT {
+    #####:  125:  return __x.base() == __y.base();
         -:  126:}
         -:  127:
         -:  128:template <class _Iter1, class _Iter2>
@@ -151,8 +150,8 @@
         -:  146:#if _LIBCPP_STD_VER <= 17
         -:  147:template <class _Iter1>
         -:  148:_LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR bool
-        7:  149:operator!=(const __wrap_iter<_Iter1>& __x, const __wrap_iter<_Iter1>& __y) _NOEXCEPT {
-        7:  150:  return !(__x == __y);
+    #####:  149:operator!=(const __wrap_iter<_Iter1>& __x, const __wrap_iter<_Iter1>& __y) _NOEXCEPT {
+    #####:  150:  return !(__x == __y);
         -:  151:}
         -:  152:
         -:  153:template <class _Iter1, class _Iter2>
@@ -241,7 +240,7 @@
         -:  236:#endif
         -:  237:
         -:  238:template <class _It>
-        -:  239:struct _LIBCPP_TEMPLATE_VIS pointer_traits<__wrap_iter<_It> > {
+        -:  239:struct pointer_traits<__wrap_iter<_It> > {
         -:  240:  typedef __wrap_iter<_It> pointer;
         -:  241:  typedef typename pointer_traits<_It>::element_type element_type;
         -:  242:  typedef typename pointer_traits<_It>::difference_type difference_type;

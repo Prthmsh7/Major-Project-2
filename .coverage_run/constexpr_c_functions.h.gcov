@@ -2,7 +2,6 @@
         -:    0:Graph:test_main.gcno
         -:    0:Data:test_main.gcda
         -:    0:Runs:1
-        -:    0:Programs:1
         -:    1://===----------------------------------------------------------------------===//
         -:    2://
         -:    3:// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
@@ -51,7 +50,7 @@
         -:   46:#endif
         -:   47:
         -:   48:template <class _Tp>
-        3:   49:inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 size_t __constexpr_strlen(const _Tp* __str) _NOEXCEPT {
+        1:   49:inline _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 size_t __constexpr_strlen(const _Tp* __str) _NOEXCEPT {
         -:   50:  static_assert(__is_char_type<_Tp>, "__constexpr_strlen only works with char and char8_t");
         -:   51:  // GCC currently doesn't support __builtin_strlen for heap-allocated memory during constant evaluation.
         -:   52:  // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=70816
@@ -65,7 +64,7 @@
         -:   60:      ;
         -:   61:    return __i;
         -:   62:  }
-        3:   63:  return __builtin_strlen(reinterpret_cast<const char*>(__str));
+        1:   63:  return __builtin_strlen(reinterpret_cast<const char*>(__str));
         -:   64:}
         -:   65:
         -:   66:// Because of __is_trivially_lexicographically_comparable_v we know that comparing the object representations is
@@ -151,7 +150,7 @@
         -:  146:    return nullptr;
         -:  147:  } else {
         -:  148:    char __value_buffer = 0;
-        -:  149:    __builtin_memcpy(&__value_buffer, &__value, sizeof(char));
+        -:  149:    __builtin_memcpy(&__value_buffer, std::addressof(__value), sizeof(char));
         -:  150:    return static_cast<_Tp*>(__builtin_memchr(__str, __value_buffer, __count));
         -:  151:  }
         -:  152:}
@@ -209,30 +208,33 @@
         -:  204:  return __dest;
         -:  205:}
         -:  206:
-        -:  207:template <class _Tp, class _Up, __enable_if_t<__is_always_bitcastable<_Up, _Tp>::value, int> = 0>
+        -:  207:template <class _Tp, class _Up>
         -:  208:_LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX14 _Tp*
         -:  209:__constexpr_memmove(_Tp* __dest, _Up* __src, __element_count __n) {
-        -:  210:  size_t __count = static_cast<size_t>(__n);
-        -:  211:  if (__libcpp_is_constant_evaluated()) {
-        -:  212:#ifdef _LIBCPP_COMPILER_CLANG_BASED
-        -:  213:    if (is_same<__remove_cv_t<_Tp>, __remove_cv_t<_Up> >::value) {
-        -:  214:      ::__builtin_memmove(__dest, __src, __count * sizeof(_Tp));
-        -:  215:      return __dest;
-        -:  216:    }
-        -:  217:#endif
-        -:  218:    if (std::__is_pointer_in_range(__src, __src + __count, __dest)) {
-        -:  219:      for (; __count > 0; --__count)
-        -:  220:        std::__assign_trivially_copyable(__dest[__count - 1], __src[__count - 1]);
-        -:  221:    } else {
-        -:  222:      for (size_t __i = 0; __i != __count; ++__i)
-        -:  223:        std::__assign_trivially_copyable(__dest[__i], __src[__i]);
-        -:  224:    }
-        -:  225:  } else if (__count > 0) {
-        -:  226:    ::__builtin_memmove(__dest, __src, (__count - 1) * sizeof(_Tp) + __datasizeof_v<_Tp>);
-        -:  227:  }
-        -:  228:  return __dest;
-        -:  229:}
-        -:  230:
-        -:  231:_LIBCPP_END_NAMESPACE_STD
-        -:  232:
-        -:  233:#endif // _LIBCPP___STRING_CONSTEXPR_C_FUNCTIONS_H
+        -:  210:  static_assert(__is_always_bitcastable<_Up, _Tp>::value);
+        -:  211:  size_t __count = static_cast<size_t>(__n);
+        -:  212:  if (__libcpp_is_constant_evaluated()) {
+        -:  213:#ifdef _LIBCPP_COMPILER_CLANG_BASED
+        -:  214:    if _LIBCPP_CONSTEXPR (is_same<__remove_cv_t<_Tp>, __remove_cv_t<_Up> >::value) {
+        -:  215:      ::__builtin_memmove(__dest, __src, __count * sizeof(_Tp));
+        -:  216:      return __dest;
+        -:  217:    } else
+        -:  218:#endif
+        -:  219:    {
+        -:  220:      if (std::__is_pointer_in_range(__src, __src + __count, __dest)) {
+        -:  221:        for (; __count > 0; --__count)
+        -:  222:          std::__assign_trivially_copyable(__dest[__count - 1], __src[__count - 1]);
+        -:  223:      } else {
+        -:  224:        for (size_t __i = 0; __i != __count; ++__i)
+        -:  225:          std::__assign_trivially_copyable(__dest[__i], __src[__i]);
+        -:  226:      }
+        -:  227:    }
+        -:  228:  } else if (__count > 0) {
+        -:  229:    ::__builtin_memmove(__dest, __src, (__count - 1) * sizeof(_Tp) + __datasizeof_v<_Tp>);
+        -:  230:  }
+        -:  231:  return __dest;
+        -:  232:}
+        -:  233:
+        -:  234:_LIBCPP_END_NAMESPACE_STD
+        -:  235:
+        -:  236:#endif // _LIBCPP___STRING_CONSTEXPR_C_FUNCTIONS_H

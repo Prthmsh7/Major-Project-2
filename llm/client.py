@@ -1,4 +1,6 @@
 import os
+import time
+import random
 from google import genai
 from google.genai import types
 
@@ -39,6 +41,7 @@ class LLMClient:
             
         self.client = genai.Client(api_key=self.api_key)
         self.model = model
+        self.max_retries = 3
 
     def generate_content(self, prompt: str, system_instruction: str = None) -> str:
         """
@@ -51,20 +54,40 @@ class LLMClient:
         if system_instruction:
             config.system_instruction = system_instruction
             
-        try:
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=prompt,
-                config=config
-            )
-            return response.text
-        except Exception as e:
-            message = str(e)
-            if "API key not valid" in message or "API_KEY_INVALID" in message:
-                print(
-                    "Error communicating with LLM: the API key was rejected. "
-                    "Check that .env.local or your shell exports a valid GOOGLE_API_KEY or GEMINI_API_KEY."
+        last_error: Exception | None = None
+        for attempt in range(self.max_retries + 1):
+            try:
+                response = self.client.models.generate_content(
+                    model=self.model,
+                    contents=prompt,
+                    config=config
                 )
-            else:
-                print(f"Error communicating with LLM: {e}")
-            return ""
+                return response.text
+            except Exception as e:
+                last_error = e
+                message = str(e)
+
+                # Retry transient demand/rate-limit issues.
+                transient = (
+                    "503" in message
+                    or "UNAVAILABLE" in message
+                    or "high demand" in message.lower()
+                    or "429" in message
+                    or "RESOURCE_EXHAUSTED" in message
+                    or "Too Many Requests" in message
+                )
+                if transient and attempt < self.max_retries:
+                    delay = min(8.0, (0.75 * (2 ** attempt)) + (random.random() * 0.25))
+                    time.sleep(delay)
+                    continue
+
+                if "API key not valid" in message or "API_KEY_INVALID" in message:
+                    print(
+                        "Error communicating with LLM: the API key was rejected. "
+                        "Check that .env.local or your shell exports a valid GOOGLE_API_KEY or GEMINI_API_KEY."
+                    )
+                else:
+                    print(f"Error communicating with LLM: {e}")
+                break
+
+        return ""

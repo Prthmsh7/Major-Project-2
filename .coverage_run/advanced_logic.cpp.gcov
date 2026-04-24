@@ -2,60 +2,59 @@
         -:    0:Graph:test_main.gcno
         -:    0:Data:test_main.gcda
         -:    0:Runs:1
-        -:    0:Programs:1
         -:    1:#include <string>
         -:    2:#include <vector>
         -:    3:
-        4:    4:int adjustScore(int base, const std::vector<int>& deltas, bool capToHundred) {
-        4:    5:    int score = base;
+    #####:    4:int adjustScore(int base, const std::vector<int>& deltas, bool capToHundred) {
+    #####:    5:    int score = base;
         -:    6:
-        7:    7:    for (int delta : deltas) {
-        5:    8:        if (delta == 0) {
-        1:    9:            continue;
+    #####:    7:    for (int delta : deltas) {
+    #####:    8:        if (delta == 0) {
+    #####:    9:            continue;
         -:   10:        }
         -:   11:
-        4:   12:        score += delta;
+    #####:   12:        score += delta;
         -:   13:
-        4:   14:        if (score < 0) {
-        1:   15:            score = 0;
-        1:   16:            break;
+    #####:   14:        if (score < 0) {
+    #####:   15:            score = 0;
+    #####:   16:            break;
         -:   17:        }
         -:   18:
-        3:   19:        if (capToHundred && score > 100) {
-        1:   20:            score = 100;
-        1:   21:            break;
+    #####:   19:        if (capToHundred && score > 100) {
+    #####:   20:            score = 100;
+    #####:   21:            break;
         -:   22:        }
         -:   23:    }
         -:   24:
-        4:   25:    return score;
+    #####:   25:    return score;
         -:   26:}
         -:   27:
-        8:   28:std::string classifyScore(int score) {
-        8:   29:    if (score < 0) {
-        1:   30:        return "invalid";
+    #####:   28:std::string classifyScore(int score) {
+    #####:   29:    if (score < 0) {
+    #####:   30:        return "invalid";
         -:   31:    }
-        7:   32:    if (score < 40) {
-        2:   33:        return "fail";
+    #####:   32:    if (score < 40) {
+    #####:   33:        return "fail";
         -:   34:    }
-        5:   35:    if (score < 75) {
-        2:   36:        return "pass";
+    #####:   35:    if (score < 75) {
+    #####:   36:        return "pass";
         -:   37:    }
-        3:   38:    if (score <= 100) {
-        2:   39:        return "distinction";
+    #####:   38:    if (score <= 100) {
+    #####:   39:        return "distinction";
         -:   40:    }
-        1:   41:    return "overflow";
-        8:   42:}
+    #####:   41:    return "overflow";
+    #####:   42:}
         -:   43:
-        5:   44:bool isStrictlyIncreasing(const std::vector<int>& values) {
-        5:   45:    if (values.empty()) {
-        1:   46:        return false;
+    #####:   44:bool isStrictlyIncreasing(const std::vector<int>& values) {
+    #####:   45:    if (values.empty()) {
+    #####:   46:        return false;
         -:   47:    }
         -:   48:
-        6:   49:    for (size_t i = 1; i < values.size(); ++i) {
-        4:   50:        if (values[i] <= values[i - 1]) {
-        2:   51:            return false;
+    #####:   49:    for (size_t i = 1; i < values.size(); ++i) {
+    #####:   50:        if (values[i] <= values[i - 1]) {
+    #####:   51:            return false;
         -:   52:        }
-        2:   53:    }
+    #####:   53:    }
         -:   54:
-        2:   55:    return true;
-        5:   56:}
+    #####:   55:    return true;
+    #####:   56:}
