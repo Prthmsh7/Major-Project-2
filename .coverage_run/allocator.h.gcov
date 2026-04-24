@@ -2,7 +2,6 @@
         -:    0:Graph:test_main.gcno
         -:    0:Data:test_main.gcda
         -:    0:Runs:1
-        -:    0:Programs:1
         -:    1:// -*- C++ -*-
         -:    2://===----------------------------------------------------------------------===//
         -:    3://
@@ -43,7 +42,7 @@
         -:   38:// These specializations shouldn't be marked _LIBCPP_DEPRECATED_IN_CXX17.
         -:   39:// Specializing allocator<void> is deprecated, but not using it.
         -:   40:template <>
-        -:   41:class _LIBCPP_TEMPLATE_VIS allocator<void> {
+        -:   41:class allocator<void> {
         -:   42:public:
         -:   43:  _LIBCPP_DEPRECATED_IN_CXX17 typedef void* pointer;
         -:   44:  _LIBCPP_DEPRECATED_IN_CXX17 typedef const void* const_pointer;
@@ -82,7 +81,7 @@
         -:   77://       allocator<void> trivial in C++20.
         -:   78:
         -:   79:template <class _Tp>
-        -:   80:class _LIBCPP_TEMPLATE_VIS allocator : private __non_trivial_if<!is_void<_Tp>::value, allocator<_Tp> > {
+        -:   80:class allocator : private __non_trivial_if<!is_void<_Tp>::value, allocator<_Tp> > {
         -:   81:  static_assert(!is_const<_Tp>::value, "std::allocator does not support const types");
         -:   82:  static_assert(!is_volatile<_Tp>::value, "std::allocator does not support volatile types");
         -:   83:
@@ -103,7 +102,7 @@
         -:   98:  [[__nodiscard__]] _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR_SINCE_CXX20 _Tp* allocate(size_t __n) {
         -:   99:    static_assert(sizeof(_Tp) >= 0, "cannot allocate memory for an incomplete type");
         -:  100:    if (__n > allocator_traits<allocator>::max_size(*this))
-        -:  101:      __throw_bad_array_new_length();
+        -:  101:      std::__throw_bad_array_new_length();
         -:  102:    if (__libcpp_is_constant_evaluated()) {
         -:  103:      return static_cast<_Tp*>(::operator new(__n * sizeof(_Tp)));
         -:  104:    } else {

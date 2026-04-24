@@ -10,6 +10,11 @@ def main():
     parser.add_argument("--max-iters", type=int, default=5, help="Maximum number of LLM feedback iterations")
     parser.add_argument("--model", type=str, default="gemini-2.5-flash", help="LLM model to use")
     parser.add_argument(
+        "--no-seed-tests",
+        action="store_true",
+        help="Disable automatic seed tests (default: seed tests are enabled)"
+    )
+    parser.add_argument(
         "--coverage-type", 
         type=str, 
         choices=["line", "branch", "function"], 
@@ -35,6 +40,7 @@ def main():
             source_file=args.source,
             max_iters=args.max_iters,
             model=args.model,
+            seed_tests=(not args.no_seed_tests),
             coverage_type=coverage_type,
             coverage_threshold=args.coverage_threshold
         )

@@ -2,7 +2,6 @@
         -:    0:Graph:test_main.gcno
         -:    0:Data:test_main.gcda
         -:    0:Runs:1
-        -:    0:Programs:1
         -:    1:// -*- C++ -*-
         -:    2://===----------------------------------------------------------------------===//
         -:    3://
@@ -221,24 +220,24 @@
         -:  216:#else
         -:  217:#  include <__config>
         -:  218:
-        -:  219:#  if _LIBCPP_HAS_LOCALIZATION
+        -:  219:// standard-mandated includes
         -:  220:
-        -:  221:#    include <__fwd/ios.h>
-        -:  222:#    include <__ios/fpos.h>
-        -:  223:#    include <__locale>
-        -:  224:#    include <__memory/addressof.h>
-        -:  225:#    include <__system_error/error_category.h>
-        -:  226:#    include <__system_error/error_code.h>
-        -:  227:#    include <__system_error/error_condition.h>
-        -:  228:#    include <__system_error/system_error.h>
-        -:  229:#    include <__utility/swap.h>
-        -:  230:#    include <__verbose_abort>
-        -:  231:#    include <version>
-        -:  232:
-        -:  233:// standard-mandated includes
-        -:  234:
-        -:  235:// [ios.syn]
-        -:  236:#    include <iosfwd>
+        -:  221:// [ios.syn]
+        -:  222:#  include <iosfwd>
+        -:  223:
+        -:  224:#  if _LIBCPP_HAS_LOCALIZATION
+        -:  225:
+        -:  226:#    include <__fwd/ios.h>
+        -:  227:#    include <__ios/fpos.h>
+        -:  228:#    include <__locale>
+        -:  229:#    include <__memory/addressof.h>
+        -:  230:#    include <__system_error/error_category.h>
+        -:  231:#    include <__system_error/error_code.h>
+        -:  232:#    include <__system_error/error_condition.h>
+        -:  233:#    include <__system_error/system_error.h>
+        -:  234:#    include <__utility/swap.h>
+        -:  235:#    include <__verbose_abort>
+        -:  236:#    include <version>
         -:  237:
         -:  238:#    if _LIBCPP_HAS_ATOMIC_HEADER
         -:  239:#      include <__atomic/atomic.h> // for __xindex_
@@ -376,7 +375,7 @@
         -:  371:  }
         -:  372:
         -:  373:  void init(void* __sb);
-        3:  374:  _LIBCPP_HIDE_FROM_ABI void* rdbuf() const { return __rdbuf_; }
+        1:  374:  _LIBCPP_HIDE_FROM_ABI void* rdbuf() const { return __rdbuf_; }
         -:  375:
         -:  376:  _LIBCPP_HIDE_FROM_ABI void rdbuf(void* __sb) {
         -:  377:    __rdbuf_ = __sb;
@@ -423,11 +422,11 @@
         -:  418:_LIBCPP_DECLARE_STRONG_ENUM_EPILOG(io_errc)
         -:  419:
         -:  420:template <>
-        -:  421:struct _LIBCPP_TEMPLATE_VIS is_error_code_enum<io_errc> : public true_type {};
+        -:  421:struct is_error_code_enum<io_errc> : public true_type {};
         -:  422:
         -:  423:#    ifdef _LIBCPP_CXX03_LANG
         -:  424:template <>
-        -:  425:struct _LIBCPP_TEMPLATE_VIS is_error_code_enum<io_errc::__lx> : public true_type {};
+        -:  425:struct is_error_code_enum<io_errc::__lx> : public true_type {};
         -:  426:#    endif
         -:  427:
         -:  428:_LIBCPP_EXPORTED_FROM_ABI const error_category& iostream_category() _NOEXCEPT;
@@ -464,7 +463,7 @@
         -:  459:
         -:  460:// fmtflags
         -:  461:
-        3:  462:inline _LIBCPP_HIDE_FROM_ABI ios_base::fmtflags ios_base::flags() const { return __fmtflags_; }
+        1:  462:inline _LIBCPP_HIDE_FROM_ABI ios_base::fmtflags ios_base::flags() const { return __fmtflags_; }
         -:  463:
         -:  464:inline _LIBCPP_HIDE_FROM_ABI ios_base::fmtflags ios_base::flags(fmtflags __fmtfl) {
         -:  465:  fmtflags __r = __fmtflags_;
@@ -499,12 +498,12 @@
         -:  494:
         -:  495:// width
         -:  496:
-        3:  497:inline _LIBCPP_HIDE_FROM_ABI streamsize ios_base::width() const { return __width_; }
+        1:  497:inline _LIBCPP_HIDE_FROM_ABI streamsize ios_base::width() const { return __width_; }
         -:  498:
-        3:  499:inline _LIBCPP_HIDE_FROM_ABI streamsize ios_base::width(streamsize __wide) {
-        3:  500:  streamsize __r = __width_;
-        3:  501:  __width_       = __wide;
-        3:  502:  return __r;
+        1:  499:inline _LIBCPP_HIDE_FROM_ABI streamsize ios_base::width(streamsize __wide) {
+        1:  500:  streamsize __r = __width_;
+        1:  501:  __width_       = __wide;
+        1:  502:  return __r;
         -:  503:}
         -:  504:
         -:  505:// iostate
@@ -556,15 +555,15 @@
         1:  551:    __fill_val_ = __x;
         1:  552:    return *this;
         -:  553:  }
-        3:  554:  _LIBCPP_HIDE_FROM_ABI bool __is_set() const { return __fill_val_ != _Traits::eof(); }
-        3:  555:  _LIBCPP_HIDE_FROM_ABI typename _Traits::int_type __get() const { return __fill_val_; }
+        1:  554:  _LIBCPP_HIDE_FROM_ABI bool __is_set() const { return __fill_val_ != _Traits::eof(); }
+        1:  555:  _LIBCPP_HIDE_FROM_ABI typename _Traits::int_type __get() const { return __fill_val_; }
         -:  556:
         -:  557:private:
         -:  558:  typename _Traits::int_type __fill_val_;
         -:  559:};
         -:  560:
         -:  561:template <class _CharT, class _Traits>
-        -:  562:class _LIBCPP_TEMPLATE_VIS basic_ios : public ios_base {
+        -:  562:class basic_ios : public ios_base {
         -:  563:public:
         -:  564:  // types:
         -:  565:  typedef _CharT char_type;
@@ -670,8 +669,8 @@
         -:  665:}
         -:  666:
         -:  667:template <class _CharT, class _Traits>
-        3:  668:inline _LIBCPP_HIDE_FROM_ABI basic_streambuf<_CharT, _Traits>* basic_ios<_CharT, _Traits>::rdbuf() const {
-        3:  669:  return static_cast<basic_streambuf<char_type, traits_type>*>(ios_base::rdbuf());
+        1:  668:inline _LIBCPP_HIDE_FROM_ABI basic_streambuf<_CharT, _Traits>* basic_ios<_CharT, _Traits>::rdbuf() const {
+        1:  669:  return static_cast<basic_streambuf<char_type, traits_type>*>(ios_base::rdbuf());
         -:  670:}
         -:  671:
         -:  672:template <class _CharT, class _Traits>
@@ -697,15 +696,15 @@
         -:  692:}
         -:  693:
         -:  694:template <class _CharT, class _Traits>
-        3:  695:inline _LIBCPP_HIDE_FROM_ABI _CharT basic_ios<_CharT, _Traits>::widen(char __c) const {
-        3:  696:  return std::use_facet<ctype<char_type> >(getloc()).widen(__c);
+        1:  695:inline _LIBCPP_HIDE_FROM_ABI _CharT basic_ios<_CharT, _Traits>::widen(char __c) const {
+        1:  696:  return std::use_facet<ctype<char_type> >(getloc()).widen(__c);
     #####:  697:}
         -:  698:
         -:  699:template <class _CharT, class _Traits>
-        3:  700:inline _LIBCPP_HIDE_FROM_ABI _CharT basic_ios<_CharT, _Traits>::fill() const {
-        3:  701:  if (!__fill_.__is_set())
+        1:  700:inline _LIBCPP_HIDE_FROM_ABI _CharT basic_ios<_CharT, _Traits>::fill() const {
+        1:  701:  if (!__fill_.__is_set())
         1:  702:    __fill_ = widen(' ');
-        3:  703:  return __fill_.__get();
+        1:  703:  return __fill_.__get();
         -:  704:}
         -:  705:
         -:  706:template <class _CharT, class _Traits>
@@ -892,11 +891,12 @@
         -:  887:#    include <limits>
         -:  888:#    include <mutex>
         -:  889:#    include <new>
-        -:  890:#    include <stdexcept>
-        -:  891:#    include <system_error>
-        -:  892:#    include <type_traits>
-        -:  893:#    include <typeinfo>
-        -:  894:#  endif
-        -:  895:#endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
-        -:  896:
-        -:  897:#endif // _LIBCPP_IOS
+        -:  890:#    include <optional>
+        -:  891:#    include <stdexcept>
+        -:  892:#    include <system_error>
+        -:  893:#    include <type_traits>
+        -:  894:#    include <typeinfo>
+        -:  895:#  endif
+        -:  896:#endif // __cplusplus < 201103L && defined(_LIBCPP_USE_FROZEN_CXX03_HEADERS)
+        -:  897:
+        -:  898:#endif // _LIBCPP_IOS

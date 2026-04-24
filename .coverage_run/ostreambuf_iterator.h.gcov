@@ -2,7 +2,6 @@
         -:    0:Graph:test_main.gcno
         -:    0:Data:test_main.gcda
         -:    0:Runs:1
-        -:    0:Programs:1
         -:    1:// -*- C++ -*-
         -:    2://===----------------------------------------------------------------------===//
         -:    3://
@@ -32,7 +31,7 @@
         -:   27:
         -:   28:_LIBCPP_SUPPRESS_DEPRECATED_PUSH
         -:   29:template <class _CharT, class _Traits>
-        -:   30:class _LIBCPP_TEMPLATE_VIS ostreambuf_iterator
+        -:   30:class ostreambuf_iterator
         -:   31:#if _LIBCPP_STD_VER <= 14 || !defined(_LIBCPP_ABI_NO_ITERATOR_BASES)
         -:   32:    : public iterator<output_iterator_tag, void, void, void, void>
         -:   33:#endif
@@ -58,7 +57,7 @@
         -:   53:  streambuf_type* __sbuf_;
         -:   54:
         -:   55:public:
-        6:   56:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator(ostream_type& __s) _NOEXCEPT : __sbuf_(__s.rdbuf()) {}
+        2:   56:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator(ostream_type& __s) _NOEXCEPT : __sbuf_(__s.rdbuf()) {}
         -:   57:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator(streambuf_type* __s) _NOEXCEPT : __sbuf_(__s) {}
         -:   58:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator& operator=(_CharT __c) {
         -:   59:    if (__sbuf_ && traits_type::eq_int_type(__sbuf_->sputc(__c), traits_type::eof()))
@@ -68,7 +67,7 @@
         -:   63:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator& operator*() { return *this; }
         -:   64:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator& operator++() { return *this; }
         -:   65:  _LIBCPP_HIDE_FROM_ABI ostreambuf_iterator& operator++(int) { return *this; }
-        3:   66:  _LIBCPP_HIDE_FROM_ABI bool failed() const _NOEXCEPT { return __sbuf_ == nullptr; }
+        1:   66:  _LIBCPP_HIDE_FROM_ABI bool failed() const _NOEXCEPT { return __sbuf_ == nullptr; }
         -:   67:
         -:   68:#if _LIBCPP_HAS_LOCALIZATION
         -:   69:  template <class _Ch, class _Tr>
