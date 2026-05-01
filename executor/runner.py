@@ -31,8 +31,17 @@ def run_test(binary_path: str = "./a.out", timeout: int = 10, cwd: str = ".") ->
     clean_gcda(cwd)
     
     try:
+        resolved_binary = binary_path
+        candidate = binary_path if os.path.isabs(binary_path) else os.path.join(cwd, binary_path)
+        if os.path.exists(candidate):
+            resolved_binary = candidate
+        elif os.name == "nt":
+            exe_candidate = f"{candidate}.exe"
+            if os.path.exists(exe_candidate):
+                resolved_binary = exe_candidate
+
         result = subprocess.run(
-            [binary_path],
+            [resolved_binary],
             capture_output=True,
             text=True,
             timeout=timeout,
