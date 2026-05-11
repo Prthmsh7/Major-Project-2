@@ -14,58 +14,15 @@
       <p>{{ error }}</p>
       {% else %}
       <h1>Task {{ task.task_id }}</h1>
-      <p>Status: {{ task.status }}</p>
       <p>Final coverage: {{ task.result.final_coverage }}%</p>
       <p>Total generated tests: {{ task.result.total_tests }}</p>
-
-      <h2>Iteration Timeline</h2>
-      <canvas id="timelineChart" width="760" height="260"></canvas>
-      <table>
-        <thead>
-          <tr><th>Iter</th><th>Compile</th><th>Run</th><th>Coverage%</th><th>Mutation%</th><th>Uncovered</th><th>Action</th><th>Duration ms</th></tr>
-        </thead>
-        <tbody>
-          {% for i in task.result.iteration_history %}
-          <tr>
-            <td>{{ i.iteration }}</td><td>{{ i.compile_success }}</td><td>{{ i.run_success }}</td>
-            <td>{{ '%.2f'|format(i.coverage) }}</td><td>{{ '%.2f'|format(i.mutation_score) if i.mutation_score is not none else '-' }}</td>
-            <td>{{ i.uncovered_count if i.uncovered_count is not none else '-' }}</td><td>{{ i.action }}</td><td>{{ i.duration_ms }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <h2>Validation Summary</h2>
+      <p>Accepted tests: {{ task.result.validation_summary.accepted_tests }}</p>
+      <p>Rejected tests: {{ task.result.validation_summary.rejected_tests }}</p>
+      <p>Rejection reasons: {{ task.result.validation_summary.rejection_reasons }}</p>
 
       <h2>Generated test file</h2>
       <pre>{{ task.result.test_file_content }}</pre>
-
-      <script>
-        const history = {{ task.result.iteration_history | tojson }};
-        const canvas = document.getElementById('timelineChart');
-        const ctx = canvas.getContext('2d');
-        const W = canvas.width, H = canvas.height;
-        ctx.clearRect(0,0,W,H);
-        ctx.strokeStyle = '#ddd'; ctx.beginPath(); ctx.moveTo(40,20); ctx.lineTo(40,H-30); ctx.lineTo(W-20,H-30); ctx.stroke();
-        if (history.length > 0) {
-          const maxX = Math.max(...history.map(h => h.iteration));
-          const xOf = x => 40 + ((W-70) * (x-1) / Math.max(1, maxX-1));
-          const yOf = y => (H-30) - ((H-60) * (y / 100));
-          ctx.strokeStyle = '#176087'; ctx.beginPath();
-          history.forEach((h, idx) => { const x=xOf(h.iteration), y=yOf(h.coverage||0); if(idx===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
-          ctx.stroke();
-          ctx.fillStyle='#176087'; history.forEach(h=>{const x=xOf(h.iteration), y=yOf(h.coverage||0); ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();});
-          const hasMut = history.some(h => h.mutation_score !== null && h.mutation_score !== undefined);
-          if (hasMut) {
-            ctx.strokeStyle = '#d97706'; ctx.beginPath();
-            let started = false;
-            history.forEach((h) => {
-              if (h.mutation_score === null || h.mutation_score === undefined) return;
-              const x=xOf(h.iteration), y=yOf(h.mutation_score||0);
-              if (!started) { ctx.moveTo(x,y); started = true; } else { ctx.lineTo(x,y); }
-            });
-            ctx.stroke();
-          }
-        }
-      </script>
       {% endif %}
       <a href="/">Back</a>
     </section>

@@ -32,6 +32,9 @@ class CoverageOptimizer:
         self.generated_test_funcs: List[str] = []
         self.test_func_names: List[str] = []
         self.iteration_history: List[dict] = []
+        self.accepted_tests = 0
+        self.rejected_tests = 0
+        self.rejection_reasons: List[str] = []
         
         # Working directory for tests.
         #
@@ -144,6 +147,130 @@ class CoverageOptimizer:
             f.write(full_code)
             
         return full_code
+
+    @staticmethod
+    def _sanitize_generated_test_code(code: str) -> str:
+        """
+        Keep only function-style test content from LLM output.
+        Removes preprocessor includes and any accidental main() blocks.
+        """
+        if not code:
+            return ""
+
+        # Drop include lines and using-namespace noise.
+        lines = []
+        for line in code.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("#include"):
+                continue
+            if stripped.startswith("using namespace"):
+                continue
+            lines.append(line)
+        code = "\n".join(lines)
+
+        # Remove accidental main() definition if present.
+        main_match = re.search(r"\b(?:int|auto|void)\s+main\s*\([^)]*\)\s*\{", code, re.MULTILINE)
+        if main_match:
+            start = main_match.start()
+            i = main_match.end() - 1
+            depth = 0
+            while i < len(code):
+                ch = code[i]
+                if ch == "{":
+                    depth += 1
+                elif ch == "}":
+                    depth -= 1
+                    if depth == 0:
+                        code = code[:start] + code[i + 1:]
+                        break
+                i += 1
+        return code.strip()
+
+    def _is_duplicate_test(self, code: str) -> bool:
+        normalized = re.sub(r"\s+", "", code)
+        for existing in self.generated_test_funcs:
+            if re.sub(r"\s+", "", existing) == normalized:
+                return True
+        return False
+
+    def _looks_like_function_block(self, code: str) -> bool:
+        return bool(re.search(r"\bvoid\s+\w+\s*\([^)]*\)\s*\{", code, re.MULTILINE))
+
+    def _validate_candidate_test(self, code: str) -> Tuple[bool, str]:
+        if not code.strip():
+            return False, "empty_after_sanitize"
+        if not self._looks_like_function_block(code):
+            return False, "not_a_void_function"
+        if self._is_duplicate_test(code):
+            return False, "duplicate_test"
+        if "#include" in code:
+            return False, "contains_include"
+        if re.search(r"\b(?:int|auto|void)\s+main\s*\(", code):
+            return False, "contains_main"
+        return True, "ok"
+
+    def _candidate_passes_compile_gate(self, code: str, func_name: str) -> bool:
+        snapshot_funcs = list(self.generated_test_funcs)
+        snapshot_names = list(self.test_func_names)
+
+        self.generated_test_funcs.append(code)
+        self.test_func_names.append(func_name)
+        self.generate_test_file()
+        success = compile_cpp(["test_main.cpp"], "a.out", cwd=self.work_dir)
+
+        # Revert candidate injection; caller decides whether to keep it.
+        self.generated_test_funcs = snapshot_funcs
+        self.test_func_names = snapshot_names
+        self.generate_test_file()
+        return success
+
+    def _minimize_test_suite(self) -> None:
+        if len(self.generated_test_funcs) <= 1:
+            return
+
+        print("Running deterministic minimization pass...")
+        kept_funcs = list(self.generated_test_funcs)
+        kept_names = list(self.test_func_names)
+        baseline_cov = 0.0
+
+        self.generate_test_file()
+        if compile_cpp(["test_main.cpp"], "a.out", cwd=self.work_dir):
+            result = run_test("./a.out", cwd=self.work_dir)
+            if result.success:
+                run_gcov("test_main.cpp", cwd=self.work_dir, coverage_type=self.coverage_type)
+                gcov_path = os.path.join(self.work_dir, f"{self.test_include_basename}.gcov")
+                cov = parse_gcov(gcov_path, coverage_type=self.coverage_type)
+                baseline_cov = cov.overall_percentage if cov else 0.0
+
+        i = 0
+        while i < len(kept_funcs):
+            trial_funcs = kept_funcs[:i] + kept_funcs[i+1:]
+            trial_names = kept_names[:i] + kept_names[i+1:]
+            self.generated_test_funcs = trial_funcs
+            self.test_func_names = trial_names
+            self.generate_test_file()
+
+            removable = False
+            if compile_cpp(["test_main.cpp"], "a.out", cwd=self.work_dir):
+                result = run_test("./a.out", cwd=self.work_dir)
+                if result.success:
+                    run_gcov("test_main.cpp", cwd=self.work_dir, coverage_type=self.coverage_type)
+                    gcov_path = os.path.join(self.work_dir, f"{self.test_include_basename}.gcov")
+                    cov = parse_gcov(gcov_path, coverage_type=self.coverage_type)
+                    score = cov.overall_percentage if cov else 0.0
+                    if score >= baseline_cov:
+                        removable = True
+
+            if removable:
+                print(f"Minimizer removed redundant test: {kept_names[i]}")
+                kept_funcs = trial_funcs
+                kept_names = trial_names
+            else:
+                i += 1
+
+        self.generated_test_funcs = kept_funcs
+        self.test_func_names = kept_names
+        self.generate_test_file()
 
     def run_optimization_loop(self) -> Tuple[CoverageData, List[str]]:
         """
@@ -297,14 +424,30 @@ class CoverageOptimizer:
             
             llm_response = self.llm_client.generate_content(prompt, system_instruction=custom_instruction)
             new_test_code = extract_cpp_code(llm_response)
+            new_test_code = self._sanitize_generated_test_code(new_test_code)
             
             if new_test_code:
-                print(f"LLM successfully generated {func_name}")
-                self.generated_test_funcs.append(new_test_code)
-                self.test_func_names.append(func_name)
-                action = "added_test"
+                ok, reason = self._validate_candidate_test(new_test_code)
+                if not ok:
+                    print(f"Rejected candidate test {func_name}: {reason}")
+                    self.rejected_tests += 1
+                    self.rejection_reasons.append(reason)
+                    action = f"rejected_{reason}"
+                elif not self._candidate_passes_compile_gate(new_test_code, func_name):
+                    print(f"Rejected candidate test {func_name}: compile_gate_failed")
+                    self.rejected_tests += 1
+                    self.rejection_reasons.append("compile_gate_failed")
+                    action = "rejected_compile_gate"
+                else:
+                    print(f"Accepted generated test {func_name}")
+                    self.generated_test_funcs.append(new_test_code)
+                    self.test_func_names.append(func_name)
+                    self.accepted_tests += 1
+                    action = "added_test"
             else:
                 print("LLM failed to generate a valid C++ code block.")
+                self.rejected_tests += 1
+                self.rejection_reasons.append("llm_no_code")
                 action = "llm_no_code"
 
             self.iteration_history.append({
@@ -318,6 +461,24 @@ class CoverageOptimizer:
                 "duration_ms": int((time.time() - iter_start) * 1000),
             })
                 
+        # Final verification pass:
+        # If we have generated tests, execute one last compile/run/coverage cycle so
+        # the reported final coverage reflects the latest test set.
+        if self.generated_test_funcs:
+            self._minimize_test_suite()
+            print("\n--- Final Verification Pass ---")
+            self.generate_test_file()
+            success = compile_cpp(["test_main.cpp"], "a.out", cwd=self.work_dir)
+            if success:
+                result = run_test("./a.out", cwd=self.work_dir)
+                if result.success:
+                    run_gcov("test_main.cpp", cwd=self.work_dir, coverage_type=self.coverage_type)
+                    gcov_path = os.path.join(self.work_dir, f"{self.test_include_basename}.gcov")
+                    verified_coverage = parse_gcov(gcov_path, coverage_type=self.coverage_type)
+                    if verified_coverage is not None:
+                        current_coverage = verified_coverage
+                        print(f"Final verified {self.coverage_type.value} coverage: {current_coverage.overall_percentage:.2f}%")
+
         # Clean up
         print("Optimization complete.")
         return current_coverage, self.generated_test_funcs

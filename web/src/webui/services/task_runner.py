@@ -25,6 +25,11 @@ def run_coverage_job(source_file: str, config: Dict[str, Any]) -> Tuple[Any, Any
         "total_tests": len(generated_tests),
         "test_file_path": optimizer.test_file_path,
         "iteration_history": optimizer.iteration_history,
+        "validation_summary": {
+            "accepted_tests": optimizer.accepted_tests,
+            "rejected_tests": optimizer.rejected_tests,
+            "rejection_reasons": optimizer.rejection_reasons,
+        },
     }
 
     if os.path.exists(optimizer.test_file_path):
