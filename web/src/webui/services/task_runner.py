@@ -10,7 +10,7 @@ def run_coverage_job(source_file: str, config: Dict[str, Any]) -> Tuple[Any, Any
     optimizer = CoverageOptimizer(
         source_file=source_file,
         max_iters=int(config.get("max_iters", 5)),
-        model=config.get("model", "gemini-2.5-flash"),
+        model="gemini-2.5-flash",
         coverage_type=coverage_type,
         coverage_threshold=float(config.get("coverage_threshold", 100.0)),
         objective=config.get("objective", "coverage"),
@@ -25,6 +25,7 @@ def run_coverage_job(source_file: str, config: Dict[str, Any]) -> Tuple[Any, Any
         "total_tests": len(generated_tests),
         "test_file_path": optimizer.test_file_path,
         "iteration_history": optimizer.iteration_history,
+        "mutation_layer": optimizer.mutation_layer_result,
         "validation_summary": {
             "accepted_tests": optimizer.accepted_tests,
             "rejected_tests": optimizer.rejected_tests,
