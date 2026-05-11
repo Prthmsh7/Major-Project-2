@@ -11,8 +11,24 @@
     <section class="card">
       <h1>LLM Coverage Optimizer</h1>
       <form id="uploadForm">
+        <label>Input mode</label>
+        <select name="input_mode" id="inputMode">
+          <option value="upload">Upload file</option>
+          <option value="editor">Write in editor</option>
+        </select>
+
+        <div id="uploadSection">
         <label>Source file (.cpp)</label>
-        <input type="file" name="file" accept=".cpp,.cc,.cxx,.c++" required />
+        <input type="file" name="file" id="fileInput" accept=".cpp,.cc,.cxx,.c++" required />
+        </div>
+
+        <div id="editorSection" style="display:none;">
+          <label>Source filename</label>
+          <input type="text" name="source_filename" value="snippet.cpp" />
+          <label>Write C++ code</label>
+          <div id="monacoEditor" aria-label="C++ code editor"></div>
+          <textarea name="source_code" id="sourceCode" rows="16" hidden></textarea>
+        </div>
 
         <label>Coverage type</label>
         <select name="coverage_type">

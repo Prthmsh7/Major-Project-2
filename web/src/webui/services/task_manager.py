@@ -32,6 +32,23 @@ class TaskManager:
         thread.start()
         return task
 
+    def create_task_from_code(self, source_code: str, source_filename: str, config) -> WebCoverageTask:
+        safe_name = secure_filename(source_filename or "snippet.cpp")
+        if not safe_name.endswith((".cpp", ".cc", ".cxx", ".c++")):
+            safe_name = f"{safe_name}.cpp"
+
+        task_id = str(uuid.uuid4())
+        upload_path = os.path.join(self.upload_folder, f"{task_id}_{safe_name}")
+        with open(upload_path, "w", encoding="utf-8") as f:
+            f.write(source_code)
+
+        task = WebCoverageTask(task_id=task_id, source_file=upload_path, config=config)
+        self.tasks[task_id] = task
+
+        thread = threading.Thread(target=self._run_task, args=(task,), daemon=True)
+        thread.start()
+        return task
+
     def _run_task(self, task: WebCoverageTask) -> None:
         try:
             task.status = "running"

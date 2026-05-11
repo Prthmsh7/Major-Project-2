@@ -17,6 +17,21 @@
       <p>Status: {{ task.status }}</p>
       <p>Final coverage: {{ task.result.final_coverage }}%</p>
       <p>Total generated tests: {{ task.result.total_tests }}</p>
+      <h2>Why Tests Were Generated</h2>
+      {% if task.result.test_generation_reasons %}
+        {% for item in task.result.test_generation_reasons %}
+        <div style="border:1px solid #ddd;padding:10px;border-radius:8px;margin-bottom:10px;">
+          <p><strong>{{ item.function_name }}</strong> (iteration {{ item.iteration }})</p>
+          <p>{{ item.reason }}</p>
+          <p>Target uncovered lines: {{ item.target_uncovered_lines }}</p>
+          {% if item.priority_lines %}
+          <p>Priority diff lines: {{ item.priority_lines }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+      <p>No LLM-generated tests were added in this run.</p>
+      {% endif %}
       <h2>Generated Test File</h2>
       <pre>{{ task.result.test_file_content }}</pre>
       {% endif %}

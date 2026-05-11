@@ -29,6 +29,23 @@ input, select, button {
   border-radius: 10px;
   border: 1px solid #c7c7c7;
 }
+textarea {
+  width: 100%;
+  min-height: 280px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #c7c7c7;
+  font-family: "IBM Plex Mono", "Fira Code", monospace;
+  background: #fffdf8;
+}
+
+#monacoEditor {
+  width: 100%;
+  min-height: 360px;
+  border: 1px solid #c7c7c7;
+  border-radius: 10px;
+  overflow: hidden;
+}
 button {
   background: var(--accent);
   color: #fff;

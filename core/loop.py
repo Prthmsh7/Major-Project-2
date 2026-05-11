@@ -42,6 +42,7 @@ class CoverageOptimizer:
             
         self.generated_test_funcs: List[str] = []
         self.test_func_names: List[str] = []
+        self.test_generation_reasons: List[dict] = []
         self.changed_lines: List[int] = []
         
         # Working directory for tests.
@@ -326,6 +327,21 @@ class CoverageOptimizer:
             print(f"LLM successfully generated {func_name}")
             self.generated_test_funcs.append(new_test_code)
             self.test_func_names.append(func_name)
+            priority_targets = sorted(set(current_coverage.uncovered_lines).intersection(self.changed_lines)) if self.changed_lines else []
+            self.test_generation_reasons.append(
+                {
+                    "function_name": func_name,
+                    "iteration": state["iteration"],
+                    "focus_mode": self.focus_mode,
+                    "target_uncovered_lines": current_coverage.uncovered_lines[:30],
+                    "priority_lines": priority_targets[:30],
+                    "reason": (
+                        "Prioritized uncovered changed lines from git diff first."
+                        if priority_targets
+                        else "Targeted currently uncovered executable lines from coverage report."
+                    ),
+                }
+            )
         else:
             print("LLM failed to generate a valid C++ code block.")
         return {**state, "status": "llm_queried"}
