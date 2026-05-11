@@ -1,1 +1,4 @@
 .env.local
+.env
+llm/__pycache__
+executor/__pycache__

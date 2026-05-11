@@ -26,13 +26,13 @@ class CoverageData:
 
     @property
     def is_fully_covered(self) -> bool:
-        """Returns True if there are zero uncovered executable lines."""
+        """Returns True only when there is coverage data and nothing uncovered."""
         if self.coverage_type == CoverageType.LINE:
-            return len(self.uncovered_lines) == 0
+            return len(self.line_counts) > 0 and len(self.uncovered_lines) == 0
         elif self.coverage_type == CoverageType.BRANCH:
-            return len(self.uncovered_branches) == 0
+            return len(self.branch_counts) > 0 and len(self.uncovered_branches) == 0
         elif self.coverage_type == CoverageType.FUNCTION:
-            return len(self.uncovered_functions) == 0
+            return len(self.function_counts) > 0 and len(self.uncovered_functions) == 0
         return False
     
     def meets_threshold(self, threshold: float) -> bool:

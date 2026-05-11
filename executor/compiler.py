@@ -46,7 +46,7 @@ def clean_coverage_artifacts(source_dir: str = ".") -> None:
     Removes generated coverage files (.gcda, .gcno) and object files.
     """
     for file in os.listdir(source_dir):
-        if file.endswith(".gcda") or file.endswith(".gcno") or file.endswith(".o") or file == "a.out":
+        if file.endswith(".gcda") or file.endswith(".gcno") or file.endswith(".o") or file == "a.out" or file == "a.out.exe":
             try:
                 os.remove(os.path.join(source_dir, file))
             except Exception as e:
