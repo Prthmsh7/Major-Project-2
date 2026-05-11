@@ -18,7 +18,20 @@ def _apply_mutation(text: str, start: int, old: str, new: str) -> str:
 
 
 def _candidate_mutations(source: str, max_mutants: int) -> List[Tuple[int, str, str]]:
-    pairs = [("==", "!="), (">=", "<"), ("<=", ">"), (">", "<="), ("<", ">=")]
+    # Keep this intentionally simple and deterministic for fast scoring.
+    # Includes arithmetic and logical flips used in mutation testing demos.
+    pairs = [
+        ("==", "!="),
+        ("!=", "=="),
+        (">=", ">"),
+        ("<=", "<"),
+        (">", ">="),
+        ("<", "<="),
+        ("+", "-"),
+        ("-", "+"),
+        ("&&", "||"),
+        ("||", "&&"),
+    ]
     out: List[Tuple[int, str, str]] = []
     for old, new in pairs:
         idx = 0

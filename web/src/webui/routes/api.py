@@ -12,7 +12,6 @@ def create_task():
         "coverage_type": request.form.get("coverage_type", "line"),
         "max_iters": int(request.form.get("max_iters", 5)),
         "coverage_threshold": float(request.form.get("coverage_threshold", 100.0)),
-        "model": request.form.get("model", "gemini-2.5-flash"),
         "objective": request.form.get("objective", "coverage"),
         "mutation_threshold": float(request.form.get("mutation_threshold", 70.0)),
     }

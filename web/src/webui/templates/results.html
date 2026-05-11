@@ -21,6 +21,16 @@
       <p>Rejected tests: {{ task.result.validation_summary.rejected_tests }}</p>
       <p>Rejection reasons: {{ task.result.validation_summary.rejection_reasons }}</p>
 
+      <h2>Mutation Testing Layer</h2>
+      {% if task.result.mutation_layer and task.result.mutation_layer.triggered %}
+      <p>Triggered: Yes (line coverage reached 100%)</p>
+      <p>Killed mutants: {{ task.result.mutation_layer.killed }} / {{ task.result.mutation_layer.total }}</p>
+      <p>Mutation score: {{ '%.2f'|format(task.result.mutation_layer.mutation_score) }}%</p>
+      {% else %}
+      <p>Triggered: No</p>
+      <p>{{ task.result.mutation_layer.reason if task.result.mutation_layer else 'Line coverage did not reach 100%.' }}</p>
+      {% endif %}
+
       <h2>Generated test file</h2>
       <pre>{{ task.result.test_file_content }}</pre>
       {% endif %}
