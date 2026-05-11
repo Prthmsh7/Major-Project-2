@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Task Result</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}" />
+</head>
+<body>
+  <main class="shell">
+    <section class="card">
+      {% if error %}
+      <h1>Error</h1>
+      <p>{{ error }}</p>
+      {% else %}
+      <h1>Task {{ task.task_id }}</h1>
+      <p>Status: {{ task.status }}</p>
+      <p>Final coverage: {{ task.result.final_coverage }}%</p>
+      <p>Total generated tests: {{ task.result.total_tests }}</p>
+      <h2>Generated Test File</h2>
+      <pre>{{ task.result.test_file_content }}</pre>
+      {% endif %}
+      <a href="/">Back</a>
+    </section>
+  </main>
+</body>
+</html>

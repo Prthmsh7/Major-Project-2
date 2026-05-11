@@ -27,6 +27,13 @@ def main():
         default=100.0,
         help="Stop when coverage reaches this percentage (default: 100.0)"
     )
+    parser.add_argument(
+        "--focus-mode",
+        type=str,
+        choices=["coverage", "diff"],
+        default="coverage",
+        help="Focus strategy for LLM test generation (default: coverage). Use 'diff' to prioritize changed lines from git diff."
+    )
     
     args = parser.parse_args()
     
@@ -42,7 +49,8 @@ def main():
             model=args.model,
             seed_tests=(not args.no_seed_tests),
             coverage_type=coverage_type,
-            coverage_threshold=args.coverage_threshold
+            coverage_threshold=args.coverage_threshold,
+            focus_mode=args.focus_mode,
         )
         final_coverage, test_funcs = optimizer.run_optimization_loop()
         

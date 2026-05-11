@@ -1,0 +1,19 @@
+from flask import Blueprint, current_app, render_template
+
+pages_bp = Blueprint("pages", __name__)
+
+
+@pages_bp.get("/")
+def index():
+    return render_template("index.html")
+
+
+@pages_bp.get("/results/<task_id>")
+def results(task_id: str):
+    task_manager = current_app.extensions["task_manager"]
+    task = task_manager.get_task(task_id)
+    if not task:
+        return render_template("results.html", error="Task not found", task_id=task_id), 404
+    if task.status != "completed":
+        return render_template("results.html", error="Task is not completed yet", task_id=task_id), 400
+    return render_template("results.html", task=task.to_dict())

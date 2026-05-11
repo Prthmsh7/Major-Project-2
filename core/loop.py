@@ -4,6 +4,7 @@ import tempfile
 import time
 import hashlib
 import re
+import subprocess
 from typing import List, Tuple, Optional, TypedDict
 from executor.compiler import compile_cpp
 from executor.runner import run_test
@@ -25,13 +26,15 @@ class OptimizerState(TypedDict):
     status: str
 
 class CoverageOptimizer:
-    def __init__(self, source_file: str, max_iters: int = 5, api_key: str = None, model: str = "gemini-2.5-flash", seed_tests: bool = True, coverage_type: CoverageType = CoverageType.LINE, coverage_threshold: float = 100.0):
+    def __init__(self, source_file: str, max_iters: int = 5, api_key: str = None, model: str = "gemini-2.5-flash", seed_tests: bool = True, coverage_type: CoverageType = CoverageType.LINE, coverage_threshold: float = 100.0, focus_mode: str = "coverage"):
         self.source_file = source_file
         self.source_basename = os.path.basename(source_file)
+        self.test_include_basename = self.source_basename
         self.max_iters = max_iters
         self.seed_tests = seed_tests
         self.coverage_type = coverage_type
         self.coverage_threshold = coverage_threshold
+        self.focus_mode = focus_mode
         self.llm_client = LLMClient(api_key=api_key, model=model)
         
         with open(self.source_file, 'r', encoding='utf-8') as f:
@@ -39,6 +42,7 @@ class CoverageOptimizer:
             
         self.generated_test_funcs: List[str] = []
         self.test_func_names: List[str] = []
+        self.changed_lines: List[int] = []
         
         # Working directory for tests.
         #
@@ -53,9 +57,94 @@ class CoverageOptimizer:
         os.makedirs(self.work_dir, exist_ok=True)
         self.test_file_path = os.path.join(self.work_dir, "test_main.cpp")
         
-        # Copy source to working directory to avoid polluting original dir
-        shutil.copy(self.source_file, self.work_dir)
+        # Copy source to working directory to avoid polluting original dir.
+        # If source defines `main`, include a sanitized copy in tests to avoid
+        # duplicate entrypoint collisions with generated `test_main.cpp`.
+        source_in_workdir = os.path.join(self.work_dir, self.source_basename)
+        shutil.copy(self.source_file, source_in_workdir)
+        self._prepare_testable_source(source_in_workdir)
+        self.changed_lines = self._get_changed_lines_from_git()
         self._graph = self._build_langgraph()
+
+    def _get_changed_lines_from_git(self) -> List[int]:
+        if self.focus_mode != "diff":
+            return []
+
+        try:
+            rel = os.path.relpath(self.source_file, start=os.getcwd())
+            cmd = ["git", "diff", "--unified=0", "--", rel]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            if result.returncode != 0:
+                return []
+
+            changed = set()
+            for line in result.stdout.splitlines():
+                if not line.startswith("@@"):
+                    continue
+                m = re.search(r"\+(\d+)(?:,(\d+))?", line)
+                if not m:
+                    continue
+                start = int(m.group(1))
+                count = int(m.group(2) or "1")
+                if count <= 0:
+                    continue
+                for ln in range(start, start + count):
+                    changed.add(ln)
+            if changed:
+                print(f"Diff-focused mode: detected {len(changed)} changed lines in {self.source_basename}")
+            return sorted(changed)
+        except Exception:
+            return []
+
+    def _prepare_testable_source(self, source_in_workdir: str) -> None:
+        """
+        Prepares the source file used by `test_main.cpp`.
+        When a translation unit contains `main`, create a copy with `main`
+        removed and include that copy from tests.
+        """
+        with open(source_in_workdir, "r", encoding="utf-8") as f:
+            code = f.read()
+
+        sanitized = self._remove_top_level_main(code)
+        if sanitized == code:
+            self.test_include_basename = self.source_basename
+            return
+
+        stem, ext = os.path.splitext(self.source_basename)
+        sanitized_basename = f"{stem}__for_tests{ext}"
+        sanitized_path = os.path.join(self.work_dir, sanitized_basename)
+        with open(sanitized_path, "w", encoding="utf-8") as f:
+            f.write(sanitized)
+        self.test_include_basename = sanitized_basename
+
+    @staticmethod
+    def _remove_top_level_main(code: str) -> str:
+        """
+        Removes `main(...) { ... }` at top level using a lightweight scanner.
+        Keeps everything else untouched.
+        """
+        pattern = re.compile(r"\b(?:int|auto|void)\s+main\s*\([^)]*\)\s*\{", re.MULTILINE)
+        match = pattern.search(code)
+        if not match:
+            return code
+
+        start = match.start()
+        i = match.end() - 1  # position at opening '{'
+        depth = 0
+        while i < len(code):
+            ch = code[i]
+            if ch == "{":
+                depth += 1
+            elif ch == "}":
+                depth -= 1
+                if depth == 0:
+                    end = i + 1
+                    # Also trim a trailing newline immediately after main block.
+                    if end < len(code) and code[end] == "\n":
+                        end += 1
+                    return code[:start] + code[end:]
+            i += 1
+        return code
 
     def _build_langgraph(self):
         workflow = StateGraph(OptimizerState)
@@ -126,7 +215,7 @@ class CoverageOptimizer:
 
     def generate_test_file(self):
         """Generates the test_main.cpp file uniting all LLM generated tests."""
-        includes = f'#include "{self.source_basename}"\n#include <cassert>\n#include <iostream>\n\n'
+        includes = f'#include "{self.test_include_basename}"\n#include <cassert>\n#include <iostream>\n\n'
         
         funcs = "\n\n".join(self.generated_test_funcs)
         
@@ -182,7 +271,7 @@ class CoverageOptimizer:
     def _node_measure_coverage(self, state: OptimizerState) -> OptimizerState:
         print(f"Running gcov and measuring {self.coverage_type.value} coverage...")
         run_gcov("test_main.cpp", cwd=self.work_dir, coverage_type=self.coverage_type)
-        gcov_path = os.path.join(self.work_dir, f"{self.source_basename}.gcov")
+        gcov_path = os.path.join(self.work_dir, f"{self.test_include_basename}.gcov")
         current_coverage = parse_gcov(gcov_path, coverage_type=self.coverage_type)
         print(f"Current {self.coverage_type.value.title()} Coverage: {current_coverage.overall_percentage:.2f}%")
 
@@ -229,6 +318,7 @@ class CoverageOptimizer:
             source_code=self.source_code,
             uncovered_lines=current_coverage.uncovered_lines,
             current_tests=state["current_tests_str"],
+            prioritized_lines=sorted(set(current_coverage.uncovered_lines).intersection(self.changed_lines)) if self.changed_lines else None,
         )
         llm_response = self.llm_client.generate_content(prompt, system_instruction=custom_instruction)
         new_test_code = extract_cpp_code(llm_response)
