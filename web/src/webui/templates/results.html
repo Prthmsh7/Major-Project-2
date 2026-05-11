@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Task Result</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Results</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}"/>
 </head>
 <body>
   <main class="shell">
@@ -14,25 +14,14 @@
       <p>{{ error }}</p>
       {% else %}
       <h1>Task {{ task.task_id }}</h1>
-      <p>Status: {{ task.status }}</p>
       <p>Final coverage: {{ task.result.final_coverage }}%</p>
       <p>Total generated tests: {{ task.result.total_tests }}</p>
-      <h2>Why Tests Were Generated</h2>
-      {% if task.result.test_generation_reasons %}
-        {% for item in task.result.test_generation_reasons %}
-        <div style="border:1px solid #ddd;padding:10px;border-radius:8px;margin-bottom:10px;">
-          <p><strong>{{ item.function_name }}</strong> (iteration {{ item.iteration }})</p>
-          <p>{{ item.reason }}</p>
-          <p>Target uncovered lines: {{ item.target_uncovered_lines }}</p>
-          {% if item.priority_lines %}
-          <p>Priority diff lines: {{ item.priority_lines }}</p>
-          {% endif %}
-        </div>
-        {% endfor %}
-      {% else %}
-      <p>No LLM-generated tests were added in this run.</p>
-      {% endif %}
-      <h2>Generated Test File</h2>
+      <h2>Validation Summary</h2>
+      <p>Accepted tests: {{ task.result.validation_summary.accepted_tests }}</p>
+      <p>Rejected tests: {{ task.result.validation_summary.rejected_tests }}</p>
+      <p>Rejection reasons: {{ task.result.validation_summary.rejection_reasons }}</p>
+
+      <h2>Generated test file</h2>
       <pre>{{ task.result.test_file_content }}</pre>
       {% endif %}
       <a href="/">Back</a>

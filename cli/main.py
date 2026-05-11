@@ -28,11 +28,17 @@ def main():
         help="Stop when coverage reaches this percentage (default: 100.0)"
     )
     parser.add_argument(
-        "--focus-mode",
+        "--objective",
         type=str,
-        choices=["coverage", "diff"],
+        choices=["coverage", "mutation", "hybrid"],
         default="coverage",
-        help="Focus strategy for LLM test generation (default: coverage). Use 'diff' to prioritize changed lines from git diff."
+        help="Primary optimization objective (default: coverage)"
+    )
+    parser.add_argument(
+        "--mutation-threshold",
+        type=float,
+        default=70.0,
+        help="Stop threshold for mutation score when objective is mutation/hybrid"
     )
     
     args = parser.parse_args()
@@ -50,7 +56,8 @@ def main():
             seed_tests=(not args.no_seed_tests),
             coverage_type=coverage_type,
             coverage_threshold=args.coverage_threshold,
-            focus_mode=args.focus_mode,
+            objective=args.objective,
+            mutation_threshold=args.mutation_threshold,
         )
         final_coverage, test_funcs = optimizer.run_optimization_loop()
         

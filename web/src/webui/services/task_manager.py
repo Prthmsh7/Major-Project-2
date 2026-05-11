@@ -22,37 +22,30 @@ class TaskManager:
     def create_task(self, file_storage, config) -> WebCoverageTask:
         filename = secure_filename(file_storage.filename)
         task_id = str(uuid.uuid4())
-        upload_path = os.path.join(self.upload_folder, f"{task_id}_{filename}")
-        file_storage.save(upload_path)
-
-        task = WebCoverageTask(task_id=task_id, source_file=upload_path, config=config)
-        self.tasks[task_id] = task
-
-        thread = threading.Thread(target=self._run_task, args=(task,), daemon=True)
-        thread.start()
-        return task
+        source_path = os.path.join(self.upload_folder, f"{task_id}_{filename}")
+        file_storage.save(source_path)
+        return self._spawn_task(task_id, source_path, config)
 
     def create_task_from_code(self, source_code: str, source_filename: str, config) -> WebCoverageTask:
-        safe_name = secure_filename(source_filename or "snippet.cpp")
-        if not safe_name.endswith((".cpp", ".cc", ".cxx", ".c++")):
-            safe_name = f"{safe_name}.cpp"
-
+        filename = secure_filename(source_filename or "snippet.cpp")
+        if not filename.endswith((".cpp", ".cc", ".cxx", ".c++")):
+            filename += ".cpp"
         task_id = str(uuid.uuid4())
-        upload_path = os.path.join(self.upload_folder, f"{task_id}_{safe_name}")
-        with open(upload_path, "w", encoding="utf-8") as f:
+        source_path = os.path.join(self.upload_folder, f"{task_id}_{filename}")
+        with open(source_path, "w", encoding="utf-8") as f:
             f.write(source_code)
+        return self._spawn_task(task_id, source_path, config)
 
-        task = WebCoverageTask(task_id=task_id, source_file=upload_path, config=config)
+    def _spawn_task(self, task_id: str, source_path: str, config) -> WebCoverageTask:
+        task = WebCoverageTask(task_id=task_id, source_file=source_path, config=config)
         self.tasks[task_id] = task
-
-        thread = threading.Thread(target=self._run_task, args=(task,), daemon=True)
-        thread.start()
+        threading.Thread(target=self._run_task, args=(task,), daemon=True).start()
         return task
 
     def _run_task(self, task: WebCoverageTask) -> None:
         try:
             task.status = "running"
-            task.progress = 5
+            task.progress = 10
             _, _, result = run_coverage_job(task.source_file, task.config)
             task.result = result
             task.status = "completed"
@@ -67,4 +60,4 @@ class TaskManager:
         return self.tasks.get(task_id)
 
     def all_tasks(self):
-        return {task_id: task.to_dict() for task_id, task in self.tasks.items()}
+        return {k: v.to_dict() for k, v in self.tasks.items()}

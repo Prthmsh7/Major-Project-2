@@ -1,100 +1,44 @@
-const form = document.getElementById('uploadForm');
+const form = document.getElementById('runForm');
 const statusEl = document.getElementById('status');
-const inputModeEl = document.getElementById('inputMode');
+const inputMode = document.getElementById('inputMode');
 const uploadSection = document.getElementById('uploadSection');
 const editorSection = document.getElementById('editorSection');
 const fileInput = document.getElementById('fileInput');
-const sourceCodeField = document.getElementById('sourceCode');
-const monacoContainer = document.getElementById('monacoEditor');
 
-let monacoEditor = null;
-
-function initializeMonaco() {
-  if (!monacoContainer) return;
-  if (window.monaco && monacoEditor) return;
-
-  const initialCode = `#include <iostream>\n\nint add(int a, int b) {\n  return a + b;\n}\n\nint main() {\n  std::cout << add(2, 3) << "\\n";\n  return 0;\n}\n`;
-
-  const onReady = () => {
-    monacoEditor = window.monaco.editor.create(monacoContainer, {
-      value: sourceCodeField?.value || initialCode,
-      language: 'cpp',
-      theme: 'vs',
-      automaticLayout: true,
-      minimap: { enabled: false },
-      fontSize: 14,
-      lineNumbers: 'on',
-      tabSize: 2,
-      insertSpaces: true,
-      wordWrap: 'on',
-      scrollBeyondLastLine: false,
-      roundedSelection: false,
-    });
-  };
-
-  if (!window.require) {
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs/loader.min.js';
-    script.onload = () => {
-      window.require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs' } });
-      window.require(['vs/editor/editor.main'], onReady);
-    };
-    document.head.appendChild(script);
-  } else {
-    window.require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.52.2/min/vs' } });
-    window.require(['vs/editor/editor.main'], onReady);
-  }
+function syncMode() {
+  const editor = inputMode.value === 'editor';
+  uploadSection.style.display = editor ? 'none' : 'block';
+  editorSection.style.display = editor ? 'block' : 'none';
+  fileInput.required = !editor;
 }
+inputMode.addEventListener('change', syncMode);
+syncMode();
 
-function syncInputMode() {
-  const isEditor = inputModeEl?.value === 'editor';
-  if (uploadSection) uploadSection.style.display = isEditor ? 'none' : 'block';
-  if (editorSection) editorSection.style.display = isEditor ? 'block' : 'none';
-  if (fileInput) fileInput.required = !isEditor;
-  if (isEditor) initializeMonaco();
-}
-
-inputModeEl?.addEventListener('change', syncInputMode);
-syncInputMode();
-
-async function pollTask(taskId) {
+function poll(taskId) {
   const timer = setInterval(async () => {
-    const res = await fetch(`/api/tasks/${taskId}`);
-    const data = await res.json();
-    statusEl.textContent = `Status: ${data.status}, Progress: ${data.progress}%`;
-
-    if (data.status === 'completed') {
+    const r = await fetch(`/api/tasks/${taskId}`);
+    const d = await r.json();
+    statusEl.textContent = `Status: ${d.status} (${d.progress}%)`;
+    if (d.status === 'completed') {
       clearInterval(timer);
       window.location.href = `/results/${taskId}`;
     }
-    if (data.status === 'error') {
+    if (d.status === 'error') {
       clearInterval(timer);
-      statusEl.textContent = `Error: ${data.error}`;
+      statusEl.textContent = `Error: ${d.error}`;
     }
-  }, 1500);
+  }, 1200);
 }
 
-form?.addEventListener('submit', async (e) => {
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  statusEl.textContent = 'Preparing and starting task...';
-
-  const isEditor = inputModeEl?.value === 'editor';
-  if (isEditor && sourceCodeField) {
-    sourceCodeField.value = monacoEditor ? monacoEditor.getValue() : sourceCodeField.value;
-  }
-
-  const formData = new FormData(form);
-  const res = await fetch('/api/tasks', {
-    method: 'POST',
-    body: formData,
-  });
-
+  statusEl.textContent = 'Starting...';
+  const fd = new FormData(form);
+  const res = await fetch('/api/tasks', { method: 'POST', body: fd });
   const data = await res.json();
   if (!res.ok) {
-    statusEl.textContent = data.error || 'Failed to create task.';
+    statusEl.textContent = data.error || 'Failed';
     return;
   }
-
-  statusEl.textContent = `Task ${data.task_id} started.`;
-  pollTask(data.task_id);
+  poll(data.task_id);
 });

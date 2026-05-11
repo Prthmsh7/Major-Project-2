@@ -8,21 +8,16 @@ from webui.services.task_manager import TaskManager
 
 
 def create_app(config_class=Config) -> Flask:
-    app = Flask(
-        __name__,
-        template_folder="templates",
-        static_folder="static",
-    )
+    app = Flask(__name__, template_folder="templates", static_folder="static")
     app.config.from_object(config_class)
 
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
     os.makedirs(app.config["RESULTS_FOLDER"], exist_ok=True)
 
-    task_manager = TaskManager(
+    app.extensions["task_manager"] = TaskManager(
         upload_folder=app.config["UPLOAD_FOLDER"],
         allowed_extensions=app.config["ALLOWED_EXTENSIONS"],
     )
-    app.extensions["task_manager"] = task_manager
 
     app.register_blueprint(pages_bp)
     app.register_blueprint(api_bp)
