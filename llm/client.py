@@ -42,6 +42,21 @@ class LLMClient:
         self.client = genai.Client(api_key=self.api_key)
         self.model = model
         self.max_retries = 3
+        self.last_error_message = ""
+        self.last_error_kind = ""
+
+    @staticmethod
+    def _classify_error(message: str) -> str:
+        lower = message.lower()
+        if "quota exceeded" in lower or "generaterequestsperdayperprojectpermodel-freetier" in lower:
+            return "quota_exhausted"
+        if "429" in message or "resource_exhausted" in lower or "too many requests" in lower:
+            return "rate_limited"
+        if "api key not valid" in lower or "api_key_invalid" in lower:
+            return "invalid_api_key"
+        if "503" in message or "unavailable" in lower or "high demand" in lower:
+            return "service_unavailable"
+        return "unknown"
 
     def generate_content(self, prompt: str, system_instruction: str = None) -> str:
         """
@@ -54,6 +69,8 @@ class LLMClient:
         if system_instruction:
             config.system_instruction = system_instruction
             
+        self.last_error_message = ""
+        self.last_error_kind = ""
         last_error: Exception | None = None
         for attempt in range(self.max_retries + 1):
             try:
@@ -62,10 +79,14 @@ class LLMClient:
                     contents=prompt,
                     config=config
                 )
+                self.last_error_message = ""
+                self.last_error_kind = ""
                 return response.text
             except Exception as e:
                 last_error = e
                 message = str(e)
+                self.last_error_message = message
+                self.last_error_kind = self._classify_error(message)
 
                 # Retry transient demand/rate-limit issues.
                 transient = (

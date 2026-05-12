@@ -16,4 +16,5 @@ def results(task_id: str):
         return render_template("results.html", error="Task not found", task_id=task_id), 404
     if task.status != "completed":
         return render_template("results.html", error="Task not completed yet", task_id=task_id), 400
-    return render_template("results.html", task=task.to_dict())
+    payload = task.to_dict()
+    return render_template("results.html", task=payload)

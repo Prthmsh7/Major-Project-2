@@ -458,7 +458,26 @@ class CoverageOptimizer:
             else:
                 print("LLM failed to generate a valid C++ code block.")
                 self.rejected_tests += 1
+                error_kind = getattr(self.llm_client, "last_error_kind", "")
+                error_msg = getattr(self.llm_client, "last_error_message", "")
+                if error_kind == "quota_exhausted":
+                    print("Stopping early: LLM quota exhausted for current model/project.")
+                    self.rejection_reasons.append("llm_quota_exhausted")
+                    action = "llm_quota_exhausted"
+                    self.iteration_history.append({
+                        "iteration": iteration,
+                        "compile_success": compile_ok,
+                        "run_success": run_ok,
+                        "coverage": current_coverage.overall_percentage,
+                        "mutation_score": mutation_score,
+                        "uncovered_count": uncovered_count,
+                        "action": action,
+                        "duration_ms": int((time.time() - iter_start) * 1000),
+                    })
+                    break
                 self.rejection_reasons.append("llm_no_code")
+                if error_msg:
+                    self.rejection_reasons.append(f"llm_error:{error_kind}")
                 action = "llm_no_code"
 
             self.iteration_history.append({
