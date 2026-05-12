@@ -1,0 +1,23 @@
+digraph CFG {
+  rankdir=TB;
+  node [shape=box, style=rounded, fontname=Helvetica];
+  entry [label="ENTRY", shape=oval];
+  exit [label="EXIT", shape=oval];
+  b0 [label="L29: branch", color="#16a34a", penwidth=2];
+  entry -> b0 [color="#16a34a", penwidth=2];
+  b1 [label="L32: branch", color="#16a34a", penwidth=2];
+  b0 -> b1 [color="#16a34a", penwidth=2];
+  b2 [label="L35: branch", color="#16a34a", penwidth=2];
+  b1 -> b2 [color="#16a34a", penwidth=2];
+  b3 [label="L38: branch", color="#16a34a", penwidth=2];
+  b2 -> b3 [color="#16a34a", penwidth=2];
+  b4 [label="L45: branch", color="#16a34a", penwidth=2];
+  b3 -> b4 [color="#16a34a", penwidth=2];
+  b5 [label="L49: branch", color="#16a34a", penwidth=2];
+  b4 -> b5 [color="#16a34a", penwidth=2];
+  b6 [label="L50: branch", color="#16a34a", penwidth=2];
+  b5 -> b6 [color="#16a34a", penwidth=2];
+  b6 -> exit;
+  legend_cov [label="Covered branch", color="#16a34a", shape=box];
+  legend_uncov [label="Uncovered branch", color="#dc2626", shape=box];
+}

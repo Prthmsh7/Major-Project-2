@@ -11,6 +11,8 @@ A CLI tool that compiles C++ code with coverage, runs tests, identifies uncovere
 ## Prerequisites
 - Python 3.10+
 - GCC toolchain (`g++`, `gcov`) available in PATH
+- LLVM/Clang (for CFG extraction via libclang)
+- Graphviz (`dot`) (for CFG SVG rendering)
 - A valid Gemini key in `GOOGLE_API_KEY` (or `GEMINI_API_KEY`)
 
 ## Setup
@@ -33,6 +35,16 @@ $env:GOOGLE_API_KEY='gemini-api-key'
 Install dependencies:
 ```bash
 pip install -r requirements.txt
+```
+
+If CFG shows `python clang bindings not installed`, install deps again and ensure `libclang` is discoverable:
+```bash
+pip install clang
+```
+
+On macOS with Homebrew, you may need:
+```bash
+export LIBCLANG_PATH="$(brew --prefix llvm)/lib"
 ```
 
 ## Run
