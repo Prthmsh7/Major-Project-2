@@ -1,45 +1,312 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Coverage Web</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Run Optimizer — Coverage Optimizer</title>
+  <meta name="description" content="Configure and run the AI-powered C++ coverage optimizer. Upload your C++ file and let Gemini generate tests."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass.css') }}"/>
+  <style>
+    .app-shell {
+      min-height: 100vh;
+      padding: 100px 24px 80px;
+      display: flex; align-items: flex-start; justify-content: center;
+    }
+    .app-panel {
+      width: 100%; max-width: 780px;
+    }
+    .app-header { text-align: center; margin-bottom: 40px; }
+    .app-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 800; margin-bottom: 10px;
+    }
+    .app-sub { color: var(--text-secondary); font-size: 0.97rem; }
+
+    .form-panel { padding: 36px 40px; }
+    @media (max-width: 600px) { .form-panel { padding: 24px 18px; } }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .form-grid--3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    @media (max-width: 700px) { .form-grid--3 { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 440px) { .form-grid--3 { grid-template-columns: 1fr; } }
+
+    .section-sep {
+      height: 1px; background: var(--glass-border);
+      margin: 28px 0;
+    }
+    .section-label {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text-muted); margin-bottom: 18px;
+    }
+
+    .submit-btn-wrap { margin-top: 28px; }
+    .btn--run {
+      width: 100%; padding: 16px 24px; font-size: 1rem;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--primary-deep), var(--secondary));
+      color: #fff; font-family: var(--font-display); font-weight: 700;
+      letter-spacing: 0.02em;
+      border: none; cursor: pointer;
+      box-shadow: 0 4px 32px var(--primary-glow), 0 1px 0 rgba(255,255,255,0.2) inset;
+      transition: all var(--duration) var(--ease-spring);
+      position: relative; overflow: hidden;
+    }
+    .btn--run::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.1) 50%, transparent 100%);
+      transform: translateX(-100%);
+      transition: transform 0.7s ease;
+    }
+    .btn--run:hover::after { transform: translateX(100%); }
+    .btn--run:hover {
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 8px 48px var(--primary-glow), 0 1px 0 rgba(255,255,255,0.25) inset;
+    }
+    .btn--run:disabled {
+      opacity: 0.55; cursor: not-allowed; transform: none;
+    }
+
+    .status-message { color: var(--text-secondary); font-size: 0.9rem; }
+    .status-message.error { color: var(--rose); }
+    .status-message.success { color: #34d399; }
+
+    .progress-bar-wrap {
+      height: 4px; background: rgba(129,140,248,0.15); border-radius: 2px; overflow: hidden;
+      margin-top: 8px; display: none;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-deep), var(--accent));
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.5s var(--ease-out);
+      animation: shimmer-bar 2s linear infinite;
+      background-size: 200% 100%;
+    }
+    @keyframes shimmer-bar {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .file-chosen {
+      font-size: 0.82rem; color: var(--accent); margin-top: 6px; min-height: 18px;
+    }
+  </style>
 </head>
 <body>
-  <main class="shell">
-    <section class="card">
-      <h1>Coverage Optimizer</h1>
-      <form id="runForm">
-        <label>Input mode</label>
-        <select name="input_mode" id="inputMode">
-          <option value="upload">Upload file</option>
-          <option value="editor">Write code</option>
-        </select>
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-blob--1"></div>
+    <div class="aurora-blob aurora-blob--2"></div>
+    <div class="aurora-blob aurora-blob--3"></div>
+  </div>
 
-        <div id="uploadSection">
-          <label>C++ file</label>
-          <input type="file" id="fileInput" name="file" accept=".cpp,.cc,.cxx,.c++" required />
+  <nav class="navbar">
+    <a href="/" class="navbar__logo gradient-text">
+      <!-- <div class="navbar__logo-icon">⚡</div> -->
+      CovOptimizer
+    </a>
+    <div class="navbar__links">
+      <a href="/" class="navbar__link">← Home</a>
+    </div>
+  </nav>
+
+  <div class="page-wrapper">
+    <div class="app-shell">
+      <div class="app-panel">
+        <div class="app-header reveal">
+          <p class="section-eyebrow">Optimizer</p>
+          <h1 class="app-title">Configure your <span class="gradient-text">run</span></h1>
+          <p class="app-sub">Upload or paste your C++ source, set parameters, and let Gemini maximize coverage.</p>
         </div>
 
-        <div id="editorSection" style="display:none;">
-          <label>Filename</label>
-          <input type="text" name="source_filename" value="snippet.cpp" />
-          <label>Code</label>
-          <textarea name="source_code" rows="14" placeholder="#include <iostream>\nint main(){ std::cout << \"Hi\"; return 0; }"></textarea>
+        <div class="glass form-panel reveal">
+          <form id="runForm">
+
+            <!-- ── Input Mode ── -->
+            <div class="section-label">Input Source</div>
+            <div class="flex gap-8" style="margin-bottom:24px;">
+              <div class="tab-pills">
+                <button type="button" class="tab-pill active" id="tabUpload" onclick="setMode('upload')">Upload File</button>
+                <button type="button" class="tab-pill" id="tabEditor" onclick="setMode('editor')">Write Code</button>
+              </div>
+            </div>
+            <input type="hidden" name="input_mode" id="inputMode" value="upload"/>
+
+            <!-- Upload section -->
+            <div id="uploadSection">
+              <div class="dropzone" id="dropzone">
+                <input type="file" id="fileInput" name="file" accept=".cpp,.cc,.cxx,.c++"/>
+                <div class="dropzone__icon">📂</div>
+                <p class="dropzone__text">
+                  <span>Click to browse</span> or drag &amp; drop your C++ file here
+                </p>
+                <p class="dropzone__text" style="font-size:0.8rem;margin-top:6px;opacity:0.6;">.cpp / .cc / .cxx / .c++</p>
+              </div>
+              <p class="file-chosen" id="fileChosen"></p>
+            </div>
+
+            <!-- Editor section -->
+            <div id="editorSection" style="display:none;">
+              <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label" for="sourceFilename">Filename</label>
+                <input class="form-control" type="text" id="sourceFilename" name="source_filename" value="snippet.cpp" placeholder="snippet.cpp"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="sourceCode">C++ Code</label>
+                <textarea class="form-control" id="sourceCode" name="source_code" rows="14"
+                  placeholder="#include &lt;iostream&gt;&#10;int main() { std::cout &lt;&lt; &quot;Hello&quot;; return 0; }"></textarea>
+              </div>
+            </div>
+
+            <div class="section-sep"></div>
+
+            <!-- ── Coverage Settings ── -->
+            <div class="section-label">Coverage Settings</div>
+            <div class="form-grid--3" style="margin-bottom:20px;">
+              <div class="form-group">
+                <label class="form-label" for="coverageType">Coverage Type</label>
+                <select class="form-control" id="coverageType" name="coverage_type">
+                  <option value="line">Line</option>
+                  <option value="branch">Branch</option>
+                  <option value="function">Function</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="maxIters">Max Iterations</label>
+                <input class="form-control" type="number" id="maxIters" name="max_iters" value="5" min="1" max="20"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="coverageThreshold">Threshold %</label>
+                <input class="form-control" type="number" id="coverageThreshold" name="coverage_threshold" value="100" min="1" max="100"/>
+              </div>
+            </div>
+
+            <!-- ── Objective Settings ── -->
+            <div class="section-label">Objective</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="objective">Objective Mode</label>
+                <select class="form-control" id="objective" name="objective">
+                  <option value="coverage">Coverage Only</option>
+                  <option value="mutation">Mutation Only</option>
+                  <option value="hybrid">Hybrid (Coverage + Mutation)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="mutationThreshold">Mutation Threshold %</label>
+                <input class="form-control" type="number" id="mutationThreshold" name="mutation_threshold" value="70" min="1" max="100"/>
+              </div>
+            </div>
+
+            <!-- ── Submit ── -->
+            <div class="submit-btn-wrap">
+              <button type="submit" class="btn--run" id="runBtn">
+                Run Coverage Optimizer
+              </button>
+            </div>
+
+          </form>
+
+          <!-- Status -->
+          <div class="status-bar mt-16" id="statusBar" style="display:none;">
+            <div class="spinner" id="spinner"></div>
+            <span class="status-message" id="statusMsg"></span>
+          </div>
+          <div class="progress-bar-wrap" id="progressWrap">
+            <div class="progress-bar-fill" id="progressFill"></div>
+          </div>
         </div>
 
-        <label>Coverage type</label>
-        <select name="coverage_type"><option value="line">line</option><option value="branch">branch</option><option value="function">function</option></select>
-        <label>Max iterations</label><input type="number" name="max_iters" value="5" min="1" max="20" />
-        <label>Coverage threshold</label><input type="number" name="coverage_threshold" value="100" min="1" max="100" />
-        <label>Objective</label><select name="objective"><option value="coverage">coverage</option><option value="mutation">mutation</option><option value="hybrid">hybrid</option></select>
-        <label>Mutation threshold</label><input type="number" name="mutation_threshold" value="70" min="1" max="100" />
-        <button type="submit">Run</button>
-      </form>
-      <p id="status"></p>
-    </section>
-  </main>
-  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setMode(mode) {
+      document.getElementById('inputMode').value = mode;
+      document.getElementById('uploadSection').style.display = mode === 'upload' ? 'block' : 'none';
+      document.getElementById('editorSection').style.display = mode === 'editor' ? 'block' : 'none';
+      document.getElementById('fileInput').required = mode === 'upload';
+      document.getElementById('tabUpload').classList.toggle('active', mode === 'upload');
+      document.getElementById('tabEditor').classList.toggle('active', mode === 'editor');
+    }
+
+    // File chosen display
+    document.getElementById('fileInput').addEventListener('change', function() {
+      document.getElementById('fileChosen').textContent = this.files[0] ? '✓ ' + this.files[0].name : '';
+    });
+
+    // Dropzone click
+    document.getElementById('dropzone').addEventListener('click', () =>
+      document.getElementById('fileInput').click()
+    );
+    document.getElementById('dropzone').addEventListener('dragover', e => {
+      e.preventDefault(); document.getElementById('dropzone').classList.add('drag-over');
+    });
+    document.getElementById('dropzone').addEventListener('dragleave', () =>
+      document.getElementById('dropzone').classList.remove('drag-over')
+    );
+    document.getElementById('dropzone').addEventListener('drop', e => {
+      e.preventDefault();
+      document.getElementById('dropzone').classList.remove('drag-over');
+      const f = e.dataTransfer.files[0];
+      if (f) {
+        const dt = new DataTransfer(); dt.items.add(f);
+        document.getElementById('fileInput').files = dt.files;
+        document.getElementById('fileChosen').textContent = '✓ ' + f.name;
+      }
+    });
+
+    function setStatus(msg, type='') {
+      const bar = document.getElementById('statusBar');
+      const el  = document.getElementById('statusMsg');
+      bar.style.display = 'flex';
+      el.textContent = msg;
+      el.className = 'status-message ' + type;
+      document.getElementById('spinner').style.display = type === 'error' ? 'none' : 'block';
+    }
+
+    function poll(taskId) {
+      const pw = document.getElementById('progressWrap');
+      pw.style.display = 'block';
+      const timer = setInterval(async () => {
+        const r = await fetch('/api/tasks/' + taskId);
+        const d = await r.json();
+        setStatus('Status: ' + d.status + ' (' + d.progress + '%)');
+        document.getElementById('progressFill').style.width = (d.progress || 0) + '%';
+        if (d.status === 'completed') {
+          clearInterval(timer);
+          setStatus('Complete! Redirecting…', 'success');
+          setTimeout(() => window.location.href = '/results/' + taskId, 600);
+        }
+        if (d.status === 'error') {
+          clearInterval(timer);
+          setStatus('Error: ' + (d.error || 'Unknown error'), 'error');
+          document.getElementById('runBtn').disabled = false;
+        }
+      }, 1200);
+    }
+
+    document.getElementById('runForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('runBtn');
+      btn.disabled = true;
+      setStatus('Starting optimizer…');
+      const fd = new FormData(e.target);
+      const res = await fetch('/api/tasks', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) { setStatus(data.error || 'Failed', 'error'); btn.disabled = false; return; }
+      poll(data.task_id);
+    });
+  </script>
+
+  <script src="{{ url_for('static', filename='js/lenis-scroll.js') }}"></script>
 </body>
 </html>

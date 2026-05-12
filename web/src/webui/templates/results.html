@@ -1,41 +1,289 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Results</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}"/>
+  <title>Results — Coverage Optimizer</title>
+  <meta name="description" content="View the AI-generated test results and coverage metrics for your C++ source."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/liquid-glass.css') }}"/>
+  <style>
+    .results-shell { padding: 100px 24px 80px; }
+    .results-header { margin-bottom: 40px; }
+
+    .task-meta {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .task-id-label {
+      font-size: 0.82rem; color: var(--text-muted); font-family: var(--font-code);
+    }
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 14px; border-radius: var(--radius-pill);
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em;
+    }
+    .status-pill--ok {
+      background: rgba(52,211,153,0.15);
+      border: 1px solid rgba(52,211,153,0.35);
+      color: #34d399;
+    }
+    .status-pill--err {
+      background: rgba(248,113,113,0.15);
+      border: 1px solid rgba(248,113,113,0.35);
+      color: var(--rose);
+    }
+    .status-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: currentColor;
+      animation: pulse-dot 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity: 1; } 50% { opacity: 0.3; }
+    }
+
+    /* Metrics row */
+    .metrics-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-bottom: 28px; }
+    @media (max-width: 700px) { .metrics-row { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 440px) { .metrics-row { grid-template-columns: 1fr; } }
+
+    /* Mutation ring card */
+    .mutation-body { display: flex; align-items: center; gap: 32px; flex-wrap: wrap; }
+    .mutation-stats { flex: 1; min-width: 200px; }
+    .mutation-stat-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .mutation-stat-row:last-child { border-bottom: none; }
+    .mutation-stat-label { font-size: 0.88rem; color: var(--text-secondary); }
+    .mutation-stat-value { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; }
+
+    .reasons-list { list-style: none; padding: 0; }
+    .reasons-list li {
+      padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.88rem; color: var(--text-secondary);
+      display: flex; align-items: flex-start; gap: 8px;
+    }
+    .reasons-list li:last-child { border-bottom: none; }
+    .reasons-list li::before { content: '›'; color: var(--rose); font-weight: 700; flex-shrink: 0; }
+
+    .not-triggered-msg {
+      display: flex; align-items: center; gap: 12px;
+      padding: 18px 20px; background: rgba(255,255,255,0.03);
+      border-radius: var(--radius-md); color: var(--text-muted); font-size: 0.9rem;
+    }
+
+    .error-card { padding: 48px; text-align: center; }
+    .error-icon { font-size: 3rem; margin-bottom: 16px; }
+    .error-title { font-family: var(--font-display); font-size: 1.6rem; font-weight: 700; color: var(--rose); margin-bottom: 12px; }
+    .error-msg { color: var(--text-secondary); font-size: 0.95rem; }
+
+    .back-link-wrap { margin-top: 36px; text-align: center; }
+  </style>
 </head>
 <body>
-  <main class="shell">
-    <section class="card">
-      {% if error %}
-      <h1>Error</h1>
-      <p>{{ error }}</p>
-      {% else %}
-      <h1>Task {{ task.task_id }}</h1>
-      <p>Final coverage: {{ task.result.final_coverage }}%</p>
-      <p>Total generated tests: {{ task.result.total_tests }}</p>
-      <h2>Validation Summary</h2>
-      <p>Accepted tests: {{ task.result.validation_summary.accepted_tests }}</p>
-      <p>Rejected tests: {{ task.result.validation_summary.rejected_tests }}</p>
-      <p>Rejection reasons: {{ task.result.validation_summary.rejection_reasons }}</p>
+  <div class="aurora-bg">
+    <div class="aurora-blob aurora-blob--1"></div>
+    <div class="aurora-blob aurora-blob--2"></div>
+    <div class="aurora-blob aurora-blob--3"></div>
+  </div>
 
-      <h2>Mutation Testing Layer</h2>
-      {% if task.result.mutation_layer and task.result.mutation_layer.triggered %}
-      <p>Triggered: Yes (line coverage reached 100%)</p>
-      <p>Killed mutants: {{ task.result.mutation_layer.killed }} / {{ task.result.mutation_layer.total }}</p>
-      <p>Mutation score: {{ '%.2f'|format(task.result.mutation_layer.mutation_score) }}%</p>
-      {% else %}
-      <p>Triggered: No</p>
-      <p>{{ task.result.mutation_layer.reason if task.result.mutation_layer else 'Line coverage did not reach 100%.' }}</p>
-      {% endif %}
+  <nav class="navbar">
+    <a href="/" class="navbar__logo gradient-text">
+      <div class="navbar__logo-icon">⚡</div>
+      CovOptimizer
+    </a>
+    <div class="navbar__links">
+      <a href="/app" class="btn btn--ghost btn--sm">← New Run</a>
+    </div>
+  </nav>
 
-      <h2>Generated test file</h2>
-      <pre>{{ task.result.test_file_content }}</pre>
-      {% endif %}
-      <a href="/">Back</a>
-    </section>
-  </main>
+  <div class="page-wrapper">
+    <div class="results-shell">
+      <div class="container">
+
+        {% if error %}
+        <!-- ═══ ERROR STATE ════════════════════════════════════ -->
+        <div class="glass error-card reveal">
+          <div class="error-icon">⚠️</div>
+          <h1 class="error-title">Something went wrong</h1>
+          <p class="error-msg">{{ error }}</p>
+          <div class="back-link-wrap">
+            <a href="/app" class="btn btn--primary mt-24">← Try Again</a>
+          </div>
+        </div>
+
+        {% else %}
+        <!-- ═══ RESULTS ════════════════════════════════════════ -->
+        <div class="results-header reveal">
+          <div class="task-meta">
+            <span class="task-id-label">Task {{ task.task_id }}</span>
+            <span class="status-pill status-pill--ok">
+              <span class="status-dot"></span> Completed
+            </span>
+          </div>
+          <h1 class="section-title">Coverage <span class="gradient-text">Results</span></h1>
+          <p class="section-subtitle">Your AI-generated test suite has been compiled, run, and validated.</p>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="metrics-row stagger-group">
+          <div class="glass metric-card stagger-item">
+            <div class="metric-card__label">Final Coverage</div>
+            <div class="metric-card__value gradient-text"
+              data-count="{{ task.result.final_coverage }}"
+              data-suffix="%"
+              data-decimals="1">0%</div>
+            <div class="metric-card__sub">of target threshold</div>
+          </div>
+          <div class="glass metric-card stagger-item">
+            <div class="metric-card__label">Tests Generated</div>
+            <div class="metric-card__value" style="color:var(--secondary);"
+              data-count="{{ task.result.total_tests }}"
+              data-suffix="">0</div>
+            <div class="metric-card__sub">total test inputs</div>
+          </div>
+          <div class="glass metric-card stagger-item">
+            <div class="metric-card__label">Accepted Tests</div>
+            <div class="metric-card__value" style="color:var(--accent);"
+              data-count="{{ task.result.validation_summary.accepted_tests }}"
+              data-suffix="">0</div>
+            <div class="metric-card__sub">passed validation</div>
+          </div>
+        </div>
+
+        <!-- Validation Summary -->
+        <div class="glass glass--card reveal" style="margin-bottom:24px;">
+          <h2 class="section-eyebrow" style="margin-bottom:20px;">Validation Summary</h2>
+          <div class="grid-2">
+            <div>
+              <div class="mutation-stat-row">
+                <span class="mutation-stat-label">Accepted Tests</span>
+                <span class="mutation-stat-value" style="color:#34d399;">
+                  {{ task.result.validation_summary.accepted_tests }}
+                </span>
+              </div>
+              <div class="mutation-stat-row">
+                <span class="mutation-stat-label">Rejected Tests</span>
+                <span class="mutation-stat-value" style="color:var(--rose);">
+                  {{ task.result.validation_summary.rejected_tests }}
+                </span>
+              </div>
+            </div>
+            <div>
+              {% if task.result.validation_summary.rejection_reasons %}
+              <div class="form-label" style="margin-bottom:12px;">Rejection Reasons</div>
+              <ul class="reasons-list">
+                {% for reason in task.result.validation_summary.rejection_reasons %}
+                <li>{{ reason }}</li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <div class="not-triggered-msg">✅ No rejections — all generated tests passed validation.</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Mutation Testing -->
+        <div class="glass glass--card reveal" style="margin-bottom:24px;">
+          <h2 class="section-eyebrow" style="margin-bottom:20px;">Mutation Testing Layer</h2>
+          {% if task.result.mutation_layer and task.result.mutation_layer.triggered %}
+          <div class="mutation-body">
+            <!-- Ring -->
+            <div class="progress-ring-wrap">
+              <svg class="progress-ring" width="120" height="120">
+                <defs>
+                  <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#818cf8"/>
+                    <stop offset="100%" stop-color="#22d3ee"/>
+                  </linearGradient>
+                </defs>
+                <circle class="progress-ring__track" cx="60" cy="60" r="50" stroke-width="8"/>
+                <circle class="progress-ring__fill" id="ringFill" cx="60" cy="60" r="50"
+                  stroke-width="8"
+                  stroke-dasharray="314"
+                  stroke-dashoffset="314"
+                  data-score="{{ task.result.mutation_layer.mutation_score }}"/>
+              </svg>
+              <div style="font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--text-secondary);">Mutation Score</div>
+            </div>
+            <!-- Stats -->
+            <div class="mutation-stats">
+              <div class="mutation-stat-row">
+                <span class="mutation-stat-label">Status</span>
+                <span class="mutation-stat-value" style="color:#34d399;">Triggered ✓</span>
+              </div>
+              <div class="mutation-stat-row">
+                <span class="mutation-stat-label">Killed Mutants</span>
+                <span class="mutation-stat-value gradient-text">
+                  {{ task.result.mutation_layer.killed }} / {{ task.result.mutation_layer.total }}
+                </span>
+              </div>
+              <div class="mutation-stat-row">
+                <span class="mutation-stat-label">Mutation Score</span>
+                <span class="mutation-stat-value gradient-text">
+                  {{ '%.2f'|format(task.result.mutation_layer.mutation_score) }}%
+                </span>
+              </div>
+            </div>
+          </div>
+          {% else %}
+          <div class="not-triggered-msg">
+            ℹ️ Mutation testing was not triggered.
+            {{ task.result.mutation_layer.reason if task.result.mutation_layer else 'Line coverage did not reach 100%.' }}
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Generated Test File -->
+        <div class="reveal" style="margin-bottom:32px;">
+          <h2 class="section-eyebrow" style="margin-bottom:16px;">Generated Test File</h2>
+          <div class="code-block">
+            <div class="code-block__header">
+              <div class="code-block__dots">
+                <div class="code-block__dot"></div>
+                <div class="code-block__dot"></div>
+                <div class="code-block__dot"></div>
+              </div>
+              <div class="code-block__header-title">test_output.cpp — AI Generated</div>
+            </div>
+            <div class="code-block__body">
+              <pre>{{ task.result.test_file_content }}</pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="back-link-wrap reveal">
+          <a href="/app" class="btn btn--primary">⚡ Run Another Optimization</a>
+          <a href="/" class="btn btn--ghost" style="margin-left:12px;">← Home</a>
+        </div>
+
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Animate mutation ring on scroll
+    document.addEventListener('DOMContentLoaded', () => {
+      const fill = document.getElementById('ringFill');
+      if (fill) {
+        const score = parseFloat(fill.dataset.score) || 0;
+        const circumference = 314;
+        const offset = circumference - (score / 100) * circumference;
+        const obs = new IntersectionObserver((entries) => {
+          if (entries[0].isIntersecting) {
+            fill.style.strokeDashoffset = offset;
+            obs.disconnect();
+          }
+        }, { threshold: 0.3 });
+        obs.observe(fill);
+      }
+    });
+  </script>
+  <script src="{{ url_for('static', filename='js/lenis-scroll.js') }}"></script>
 </body>
 </html>

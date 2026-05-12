@@ -4,6 +4,11 @@ pages_bp = Blueprint("pages", __name__)
 
 
 @pages_bp.get("/")
+def landing():
+    return render_template("landing.html")
+
+
+@pages_bp.get("/app")
 def index():
     return render_template("index.html")
 
