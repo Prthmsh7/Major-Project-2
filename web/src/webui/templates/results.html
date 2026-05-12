@@ -135,21 +135,21 @@
             <div class="metric-card__value gradient-text"
               data-count="{{ task.result.final_coverage }}"
               data-suffix="%"
-              data-decimals="1">0%</div>
+              data-decimals="1">{{ '%.1f'|format(task.result.final_coverage) }}%</div>
             <div class="metric-card__sub">of target threshold</div>
           </div>
           <div class="glass metric-card stagger-item">
             <div class="metric-card__label">Tests Generated</div>
             <div class="metric-card__value" style="color:var(--secondary);"
               data-count="{{ task.result.total_tests }}"
-              data-suffix="">0</div>
+              data-suffix="">{{ task.result.total_tests }}</div>
             <div class="metric-card__sub">total test inputs</div>
           </div>
           <div class="glass metric-card stagger-item">
             <div class="metric-card__label">Accepted Tests</div>
             <div class="metric-card__value" style="color:var(--accent);"
               data-count="{{ task.result.validation_summary.accepted_tests }}"
-              data-suffix="">0</div>
+              data-suffix="">{{ task.result.validation_summary.accepted_tests }}</div>
             <div class="metric-card__sub">passed validation</div>
           </div>
         </div>
